@@ -134,6 +134,18 @@ def mark_complete(lesson_id, score=None, time_spent=25):
     log_session(lesson_id, time_spent, "completed", f"Score:{score}")
     return fields
 
+def unmark_complete(lesson_id):
+    sb = _sb()
+    fields = {"lesson_id": lesson_id, "status": "not_started", "completed_date": None,
+              "score": None, "review_count": 0, "next_review": None, "feynman_done": False}
+    if sb:
+        try: sb.table("progress").upsert(fields).execute()
+        except Exception: pass
+    for key in [f"_progress_{lesson_id[:1]}", "_progress_"]:
+        prog = st.session_state.get(key, {})
+        prog[lesson_id] = fields
+        st.session_state[key] = prog
+
 def mark_in_progress(lesson_id):
     prog = load_progress()
     if prog.get(lesson_id,{}).get("status") != "completed":
@@ -562,6 +574,13 @@ def render_lesson_viewer(lesson, unit_color, unit_level):
                 result = mark_complete(lesson_id, score=score, time_spent=t)
                 st.success(f"🎉 Done! Next review: **{result['next_review']}**")
                 st.balloons()
+                st.rerun()
+
+        if status == "completed":
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.button("↩️ Unmark as Complete", key=f"unmark_{lesson_id}", use_container_width=True):
+                unmark_complete(lesson_id)
+                st.info("Lesson unmarked — back to not started.")
                 st.rerun()
 
 # ─── Generic Subject Page ─────────────────────────────────────────────────────
