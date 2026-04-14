@@ -247,6 +247,7 @@ def render_sidebar():
 
         pages = {
             "🏠  Overview": "overview",
+            "📅  Calendar": "calendar",
             "🇰🇷  Korean": "korean",
             "⚛️  Physics": "physics",
             "✈️  RAF Application": "raf",
@@ -845,14 +846,19 @@ def page_raf():
 # ─── Main ─────────────────────────────────────────────────────────────────────
 
 def main():
-    inject_css()
-    if not check_password(): return
-    render_sidebar()
-    page = st.session_state.get("current_page","overview")
-    if page == "overview": page_overview()
-    elif page == "korean": page_korean()
-    elif page == "physics": page_physics()
-    elif page == "raf": page_raf()
+         inject_css()
+         if not check_password(): return
+         render_sidebar()
+         page = st.session_state.get("current_page","overview")
+         if page == "overview": page_overview()
+         elif page == "calendar":
+             from calendar_page import page_calendar
+             page_calendar()
+         elif page == "korean": page_korean()
+         elif page == "physics": page_physics()
+         elif page == "raf": page_raf()
+
+
 
 if __name__ == "__main__":
     main()
