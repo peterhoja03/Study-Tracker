@@ -44,67 +44,74 @@ def check_password():
 # ─── CSS ─────────────────────────────────────────────────────────────────────
 
 def inject_css():
-    st.markdown("""
+    dark = st.session_state.get("dark_mode", False)
+    bg = "#0d1117" if dark else "#f8f9fa"
+    card_bg = "#161b22" if dark else "white"
+    card_border = "#30363d" if dark else "#f0f0f8"
+    text_col = "#e6edf3" if dark else "#1a1a2e"
+    subtext = "#8b949e" if dark else "#888"
+    recall_bg = "#1f1a00" if dark else "#fffbf0"
+    recall_border = "#5a4a00" if dark else "#f0d060"
+    done_bg = "#0d2318" if dark else "#f8fff9"
+    prog_bg = "#30363d" if dark else "#f0f0f8"
+    today_bg = "#1a2744" if dark else "#f0f7ff"
+    today_border = "#2a4070" if dark else "#d0e4ff"
+    inprog_bg = "#1f1a0a" if dark else "#fffdf5"
+    st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Playfair+Display:wght@600;700&display=swap');
-    html,body,[class*="css"]{font-family:'Noto Sans KR',sans-serif;}
-    #MainMenu,footer,.stDeployButton{visibility:hidden;display:none;}
-    section[data-testid="stSidebar"]{background:linear-gradient(180deg,#0d1b2a 0%,#1b2838 60%,#1a3a5c 100%);border-right:1px solid #1e3a5f;}
+    html,body,[class*="css"]{{font-family:'Noto Sans KR',sans-serif;}}
+    #MainMenu,footer,.stDeployButton{{visibility:hidden;display:none;}}
+    .main .block-container{{background:{bg}!important;transition:background .3s;}}
+    .stat-card{{background:{card_bg};border-radius:16px;padding:1.4rem;box-shadow:0 2px 12px rgba(0,0,0,.06);border:1px solid {card_border};text-align:center;}}
+    .stat-number{{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:{text_col};line-height:1;}}
+    .stat-label{{color:{subtext};font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;margin-top:.3rem;}}
+    .lesson-card{{background:{card_bg};border-radius:10px;padding:.9rem 1.1rem;margin-bottom:.5rem;border:1px solid {card_border};border-left:4px solid #ddd;color:{text_col};}}
+    .lesson-card.completed{{border-left-color:#27ae60;background:{done_bg};}}
+    .lesson-card.in_progress{{border-left-color:#f39c12;background:{inprog_bg};}}
+    .badge{{display:inline-block;padding:.18rem .6rem;border-radius:999px;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;}}
+    .badge-completed{{background:#d4f5e2;color:#1a7a42;}}
+    .badge-in_progress{{background:#fff3cd;color:#856404;}}
+    .badge-not_started{{background:{"#21262d" if dark else "#f0f0f8"};color:{subtext};}}
+    .progress-bar-container{{background:{prog_bg};border-radius:999px;height:8px;overflow:hidden;margin:.4rem 0;}}
+    .progress-bar-fill{{height:100%;border-radius:999px;}}
+    .feynman-box{{background:linear-gradient(135deg,#1a1a2e,#0f3460);border-radius:12px;padding:1.5rem;color:white;border-left:4px solid #e94560;}}
+    .recall-box{{background:{recall_bg};border:1px solid {recall_border};border-radius:12px;padding:1.2rem 1.5rem;}}
+    .roadmap-step{{background:{card_bg};border-radius:10px;padding:.9rem 1.2rem;margin-bottom:.5rem;border:1px solid {card_border};border-left:4px solid #3498db;color:{text_col};}}
+    .roadmap-step.done{{border-left-color:#27ae60;background:{done_bg};}}
+    .roadmap-step.current{{border-left-color:#f39c12;background:{inprog_bg};}}
+    .today-card{{background:{today_bg};border:1px solid {today_border};border-radius:12px;padding:1rem 1.2rem;font-size:.88rem;margin-bottom:1rem;color:{text_col};}}
+    .wpp-block{{background:{card_bg};border-radius:8px;padding:.7rem 1rem;margin-bottom:.4rem;border:1px solid {card_border};color:{text_col};}}
+    section[data-testid="stSidebar"]{{background:linear-gradient(180deg,#0d1b2a 0%,#1b2838 60%,#1a3a5c 100%)!important;border-right:1px solid #1e3a5f;}}
     section[data-testid="stSidebar"] .stMarkdown p,
     section[data-testid="stSidebar"] .stMarkdown h2,
-    section[data-testid="stSidebar"] .stMarkdown h3{color:#e8eaf0!important;}
-    section[data-testid="stSidebar"] .stButton button{background:rgba(255,255,255,.07);color:#e8eaf0;border:1px solid rgba(255,255,255,.12);border-radius:8px;width:100%;text-align:left;transition:all .2s;}
-    section[data-testid="stSidebar"] .stButton button:hover{background:rgba(255,255,255,.15);}
-    .stat-card{background:white;border-radius:16px;padding:1.4rem;box-shadow:0 2px 12px rgba(0,0,0,.06);border:1px solid #f0f0f8;text-align:center;}
-    .stat-number{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:#1a1a2e;line-height:1;}
-    .stat-label{color:#888;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;margin-top:.3rem;}
-    .subject-card{border-radius:16px;padding:1.5rem;margin-bottom:1rem;border:1px solid #eee;}
-    .goal-card{background:#f8f9ff;border-radius:12px;padding:1.2rem 1.5rem;border-left:4px solid #3498db;margin-bottom:.8rem;}
-    .lesson-card{background:white;border-radius:10px;padding:.9rem 1.1rem;margin-bottom:.5rem;border:1px solid #eee;border-left:4px solid #ddd;}
-    .lesson-card.completed{border-left-color:#27ae60;background:#f8fff9;}
-    .lesson-card.in_progress{border-left-color:#f39c12;background:#fffdf5;}
-    .badge{display:inline-block;padding:.18rem .6rem;border-radius:999px;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;}
-    .badge-completed{background:#d4f5e2;color:#1a7a42;}
-    .badge-in_progress{background:#fff3cd;color:#856404;}
-    .badge-not_started{background:#f0f0f8;color:#888;}
-    .progress-bar-container{background:#f0f0f8;border-radius:999px;height:8px;overflow:hidden;margin:.4rem 0;}
-    .progress-bar-fill{height:100%;border-radius:999px;}
-    .feynman-box{background:linear-gradient(135deg,#1a1a2e,#0f3460);border-radius:12px;padding:1.5rem;color:white;border-left:4px solid #e94560;}
-    .recall-box{background:#fffbf0;border:1px solid #f0d060;border-radius:12px;padding:1.2rem 1.5rem;}
-    .roadmap-step{background:white;border-radius:10px;padding:.9rem 1.2rem;margin-bottom:.5rem;border:1px solid #e8eaf0;border-left:4px solid #3498db;}
-    .roadmap-step.done{border-left-color:#27ae60;background:#f8fff9;}
-    .roadmap-step.current{border-left-color:#f39c12;background:#fffdf5;}
+    section[data-testid="stSidebar"] .stMarkdown h3{{color:#e8eaf0!important;}}
+    section[data-testid="stSidebar"] .stButton button{{background:rgba(255,255,255,.07);color:#e8eaf0;border:1px solid rgba(255,255,255,.12);border-radius:8px;width:100%;text-align:left;transition:all .2s;}}
+    section[data-testid="stSidebar"] .stButton button:hover{{background:rgba(255,255,255,.15);}}
+    @media (max-width:768px){{
+        .block-container{{padding:.8rem .4rem!important;}}
+        .stat-card{{padding:.7rem .3rem!important;}}
+        .stat-number{{font-size:1.2rem!important;}}
+        .stat-label{{font-size:.58rem!important;}}
+        .lesson-card{{padding:.6rem .7rem!important;font-size:.85rem;}}
+        section[data-testid="stSidebar"]{{display:none!important;}}
+        .mobile-nav{{display:flex!important;}}
+        h1{{font-size:1.4rem!important;}}
+    }}
+    @media (min-width:769px){{
+        .mobile-nav{{display:none!important;}}
+    }}
+    .mobile-nav{{display:none;gap:.4rem;margin-bottom:1.2rem;flex-wrap:wrap;padding:.5rem 0;}}
+    .mobile-nav a{{background:{card_bg};color:{text_col};border:1px solid {card_border};border-radius:8px;padding:.5rem .9rem;text-decoration:none;font-size:.82rem;font-weight:600;}}
+    </style>
+    <div class="mobile-nav">
+      <a href="?page=overview">🏠 Home</a>
+      <a href="?page=korean">🇰🇷 Korean</a>
+      <a href="?page=physics">⚛️ Physics</a>
+      <a href="?page=raf">✈️ RAF</a>
+    </div>
+    """, unsafe_allow_html=True)
 
-    /* ── Dark mode ── */
-    body.dark-mode .main .block-container{background:#0d1117!important;}
-    body.dark-mode .stat-card{background:#161b22!important;border-color:#30363d!important;}
-    body.dark-mode .stat-number{color:#e6edf3!important;}
-    body.dark-mode .lesson-card{background:#161b22!important;border-color:#30363d!important;color:#e6edf3!important;}
-    body.dark-mode .lesson-card.completed{background:#0d2318!important;}
-    body.dark-mode .lesson-card.in_progress{background:#1f1a0a!important;}
-    body.dark-mode .roadmap-step{background:#161b22!important;border-color:#30363d!important;}
-    body.dark-mode .roadmap-step.done{background:#0d2318!important;}
-    body.dark-mode .roadmap-step.current{background:#1f1a0a!important;}
-    body.dark-mode .recall-box{background:#1f1a00!important;border-color:#5a4a00!important;}
-    body.dark-mode .progress-bar-container{background:#30363d!important;}
-
-    /* ── Mobile ── */
-    @media (max-width:768px){
-        .block-container{padding:1rem .6rem!important;}
-        .stat-card{padding:.8rem .4rem!important;}
-        .stat-number{font-size:1.3rem!important;}
-        .stat-label{font-size:.62rem!important;}
-        .lesson-card{padding:.65rem .75rem!important;}
-    }
-    </style>""", unsafe_allow_html=True)
-
-    # Dark mode JS toggle
-    if "dark_mode" not in st.session_state:
-        st.session_state.dark_mode = False
-    dm_class = "dark-mode" if st.session_state.dark_mode else ""
-    st.markdown(f'<script>window.parent.document.body.className=window.parent.document.body.className.replace(/\\bdark-mode\\b/,"").trim()+" {dm_class}".trim();</script>', unsafe_allow_html=True)
-
-# ─── Store helpers ────────────────────────────────────────────────────────────
 
 def _sb():
     if "supabase_client" not in st.session_state:
@@ -329,32 +336,48 @@ def page_overview():
     type_labels = {"continue":"▶️ Continue","review":"🔄 Review","start":"🆕 Start","done":"✅ All done"}
     type_colors = {"continue":"#f39c12","review":"#e74c3c","start":"#27ae60","done":"#888"}
 
+    # Schedule context based on your weekly routine
+    schedule_notes = {
+        "Monday":    ("🏃 Run + calisthenics morning", "Good day for a full 3-block study session after your workout."),
+        "Tuesday":   ("🏑 Hockey tonight", "Study before hockey — get all 3 blocks done this morning/afternoon."),
+        "Wednesday": ("Rest day", "Full study day — aim for all 3 blocks."),
+        "Thursday":  ("🏑 Hockey tonight", "Study before hockey — get all 3 blocks done this morning/afternoon."),
+        "Friday":    ("Rest day", "Good study day — no evening commitments."),
+        "Saturday":  ("🏑 Hockey this afternoon", "Study in the morning before hockey."),
+        "Sunday":    ("Rest day", "Lighter day — even 1-2 blocks keeps the streak going."),
+    }
+    activity, advice = schedule_notes.get(today_name, ("", ""))
+
     st.markdown(f"""
     <div style="background:linear-gradient(135deg,#0d1b2a,#1a3a5c);border-radius:16px;padding:1.4rem 1.8rem;
                 margin-bottom:1.5rem;border:1px solid #1e3a5f;color:white">
-        <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:#6a8ab0;margin-bottom:.6rem">
-            🗓️ Today's Focus — {today_name}
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.4rem;margin-bottom:.5rem">
+            <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:#6a8ab0">
+                🗓️ Today's Focus — {today_name}
+            </div>
+            <div style="font-size:.78rem;color:#6a8ab0">{activity}</div>
         </div>
+        <div style="font-size:.82rem;color:#a8c0d8;margin-bottom:1rem;font-style:italic">{advice}</div>
         <div style="display:flex;gap:1.5rem;flex-wrap:wrap">
-            <div style="flex:1;min-width:160px">
-                <span style="color:#aaa;font-size:.75rem">🇰🇷 KOREAN</span><br>
+            <div style="flex:1;min-width:140px">
+                <span style="color:#aaa;font-size:.72rem">🇰🇷 KOREAN</span><br>
                 <span style="color:{type_colors[k_type]};font-size:.82rem;font-weight:600">{type_labels[k_type]}</span>
                 <span style="color:#ddd;font-size:.82rem"> {k_id or ''}</span>
             </div>
-            <div style="flex:1;min-width:160px">
-                <span style="color:#aaa;font-size:.75rem">⚛️ PHYSICS</span><br>
+            <div style="flex:1;min-width:140px">
+                <span style="color:#aaa;font-size:.72rem">⚛️ PHYSICS</span><br>
                 <span style="color:{type_colors[p_type]};font-size:.82rem;font-weight:600">{type_labels[p_type]}</span>
                 <span style="color:#ddd;font-size:.82rem"> {p_id or ''}</span>
             </div>
-            <div style="flex:1;min-width:160px">
-                <span style="color:#aaa;font-size:.75rem">✈️ RAF</span><br>
+            <div style="flex:1;min-width:140px">
+                <span style="color:#aaa;font-size:.72rem">✈️ RAF</span><br>
                 <span style="color:{type_colors[r_type]};font-size:.82rem;font-weight:600">{type_labels[r_type]}</span>
                 <span style="color:#ddd;font-size:.82rem"> {r_id or ''}</span>
             </div>
-            <div style="flex:1;min-width:160px;border-left:1px solid #1e3a5f;padding-left:1.2rem">
-                <span style="color:#aaa;font-size:.75rem">⏱ TARGET</span><br>
+            <div style="flex:1;min-width:140px;border-left:1px solid #1e3a5f;padding-left:1.2rem">
+                <span style="color:#aaa;font-size:.72rem">⏱ TARGET</span><br>
                 <span style="color:white;font-size:.82rem;font-weight:600">3 × 25 min blocks</span><br>
-                <span style="color:#6a8ab0;font-size:.75rem">~75 min total today</span>
+                <span style="color:#6a8ab0;font-size:.75rem">~75 min total</span>
             </div>
         </div>
     </div>""", unsafe_allow_html=True)
@@ -416,38 +439,52 @@ def page_overview():
 
     with col_right:
         st.subheader("🗓️ Today's Plan")
-        st.markdown("""
-        <div style="background:#f0f7ff;border-radius:12px;padding:1rem 1.2rem;font-size:.88rem;margin-bottom:1rem">
-            <strong>Daily rhythm:</strong><br>
-            🇰🇷 25 min Korean<br>
-            ⚛️ 25 min Physics<br>
-            ✈️ 25 min RAF prep<br>
-            <span style="color:#888;font-size:.78rem">~75 min total · 3 focused blocks</span>
+        day = date.today().weekday()
+        wpp = {
+            0: {"label":"Monday — Work + Fitness","blocks":1,"note":"1 study block · Morning only · Rest after Amazon","color":"#e74c3c"},
+            1: {"label":"Tuesday — Study Day","blocks":3,"note":"2–3 study blocks · Full morning available","color":"#27ae60"},
+            2: {"label":"Wednesday — Work + Fitness","blocks":1,"note":"1 study block · Morning only · Rest after Amazon","color":"#e74c3c"},
+            3: {"label":"Thursday — Full Study Day","blocks":4,"note":"3–4 study blocks · Best day of the week","color":"#27ae60"},
+            4: {"label":"Friday — Work + Fitness","blocks":1,"note":"1 study block · Morning only · Friday evening is free","color":"#e74c3c"},
+            5: {"label":"Saturday — Optional","blocks":1,"note":"1 optional block · GF time takes priority","color":"#f39c12"},
+            6: {"label":"Sunday — Flexible","blocks":2,"note":"Anki + 1–2 if natural · Never forced","color":"#8e44ad"},
+        }
+        tw = wpp[day]
+        blocks = tw["blocks"]
+        st.markdown(f"""
+        <div class="today-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
+                <strong>{tw['label']}</strong>
+                <span style="background:{tw['color']};color:white;border-radius:999px;padding:.15rem .65rem;font-size:.72rem;font-weight:700">{blocks} block{'s' if blocks>1 else ''}</span>
+            </div>
+            <span style="font-size:.8rem;opacity:.8">{tw['note']}</span><br>
+            <span style="font-size:.75rem;opacity:.6">🔑 Anki: 10 min Korean · Morning before coffee</span>
         </div>""", unsafe_allow_html=True)
-
-        # What to do next per subject
-        for name, prefix, page_key, icon in [
+        subject_order = [
             ("Korean","U","korean","🇰🇷"),
             ("Physics","P","physics","⚛️"),
             ("RAF","R","raf","✈️"),
-        ]:
+        ]
+        shown = 0
+        for name, prefix, page_key, icon in subject_order:
+            if shown >= blocks and blocks < 3:
+                break
             prog = {k:v for k,v in all_prog.items() if k.startswith(prefix)}
             in_prog = [k for k,v in prog.items() if v.get("status")=="in_progress"]
+            due_items = get_due(prefix)
             if in_prog:
-                lid = in_prog[0]
-                st.markdown(f"""<div style="background:white;border-radius:8px;padding:.7rem 1rem;
-                    margin-bottom:.4rem;border:1px solid #eee;border-left:3px solid #f39c12">
-                    {icon} <strong>Continue:</strong> {lid}</div>""", unsafe_allow_html=True)
+                label = f"Continue: {in_prog[0]}"
+                border_col = "#f39c12"
+            elif due_items:
+                label = f"Review due: {due_items[0]}"
+                border_col = "#e74c3c"
             else:
-                due = get_due(prefix)
-                if due:
-                    st.markdown(f"""<div style="background:white;border-radius:8px;padding:.7rem 1rem;
-                        margin-bottom:.4rem;border:1px solid #eee;border-left:3px solid #e74c3c">
-                        {icon} <strong>Review due:</strong> {due[0]}</div>""", unsafe_allow_html=True)
-                else:
-                    st.markdown(f"""<div style="background:white;border-radius:8px;padding:.7rem 1rem;
-                        margin-bottom:.4rem;border:1px solid #eee;border-left:3px solid #27ae60">
-                        {icon} Start next lesson</div>""", unsafe_allow_html=True)
+                label = "Start next lesson"
+                border_col = "#27ae60"
+            st.markdown(f'''<div class="wpp-block" style="border-left:3px solid {border_col}">
+                {icon} <strong>{name}</strong> · <span style="font-size:.82rem">{label}</span>
+            </div>''', unsafe_allow_html=True)
+            shown += 1
 
     st.markdown("---")
 
