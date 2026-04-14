@@ -74,7 +74,35 @@ def inject_css():
     .roadmap-step{background:white;border-radius:10px;padding:.9rem 1.2rem;margin-bottom:.5rem;border:1px solid #e8eaf0;border-left:4px solid #3498db;}
     .roadmap-step.done{border-left-color:#27ae60;background:#f8fff9;}
     .roadmap-step.current{border-left-color:#f39c12;background:#fffdf5;}
+
+    /* ── Dark mode ── */
+    body.dark-mode .main .block-container{background:#0d1117!important;}
+    body.dark-mode .stat-card{background:#161b22!important;border-color:#30363d!important;}
+    body.dark-mode .stat-number{color:#e6edf3!important;}
+    body.dark-mode .lesson-card{background:#161b22!important;border-color:#30363d!important;color:#e6edf3!important;}
+    body.dark-mode .lesson-card.completed{background:#0d2318!important;}
+    body.dark-mode .lesson-card.in_progress{background:#1f1a0a!important;}
+    body.dark-mode .roadmap-step{background:#161b22!important;border-color:#30363d!important;}
+    body.dark-mode .roadmap-step.done{background:#0d2318!important;}
+    body.dark-mode .roadmap-step.current{background:#1f1a0a!important;}
+    body.dark-mode .recall-box{background:#1f1a00!important;border-color:#5a4a00!important;}
+    body.dark-mode .progress-bar-container{background:#30363d!important;}
+
+    /* ── Mobile ── */
+    @media (max-width:768px){
+        .block-container{padding:1rem .6rem!important;}
+        .stat-card{padding:.8rem .4rem!important;}
+        .stat-number{font-size:1.3rem!important;}
+        .stat-label{font-size:.62rem!important;}
+        .lesson-card{padding:.65rem .75rem!important;}
+    }
     </style>""", unsafe_allow_html=True)
+
+    # Dark mode JS toggle
+    if "dark_mode" not in st.session_state:
+        st.session_state.dark_mode = False
+    dm_class = "dark-mode" if st.session_state.dark_mode else ""
+    st.markdown(f'<script>window.parent.document.body.className=window.parent.document.body.className.replace(/\\bdark-mode\\b/,"").trim()+" {dm_class}".trim();</script>', unsafe_allow_html=True)
 
 # ─── Store helpers ────────────────────────────────────────────────────────────
 
@@ -254,6 +282,11 @@ def render_sidebar():
         </div>""", unsafe_allow_html=True)
 
         st.markdown("<br>", unsafe_allow_html=True)
+        dm_label = "☀️  Light Mode" if st.session_state.get("dark_mode") else "🌙  Dark Mode"
+        if st.button(dm_label, use_container_width=True):
+            st.session_state.dark_mode = not st.session_state.get("dark_mode", False)
+            st.rerun()
+
         if st.button("🔒  Log Out", use_container_width=True):
             st.session_state.authenticated = False
             st.rerun()
@@ -273,6 +306,58 @@ def page_overview():
     sessions = load_sessions()
     streak = get_streak()
     hours = round(total_time()/60,1)
+
+    # ── Today's Goal Prompt ──
+    today_name = date.today().strftime("%A")
+    all_prog_early = load_progress()
+
+    # Work out what to focus on for each subject today
+    def next_lesson_id(prefix, curriculum):
+        in_prog = [k for k,v in all_prog_early.items() if k.startswith(prefix) and v.get("status")=="in_progress"]
+        if in_prog: return in_prog[0], "continue"
+        due = get_due(prefix)
+        if due: return due[0], "review"
+        all_l = [l["id"] for u in curriculum.values() for l in u["lessons"]]
+        not_started = [l for l in all_l if all_prog_early.get(l,{}).get("status","not_started")=="not_started"]
+        if not_started: return not_started[0], "start"
+        return None, "done"
+
+    k_id, k_type = next_lesson_id("U", K_CUR)
+    p_id, p_type = next_lesson_id("P", P_CUR)
+    r_id, r_type = next_lesson_id("R", R_CUR)
+
+    type_labels = {"continue":"▶️ Continue","review":"🔄 Review","start":"🆕 Start","done":"✅ All done"}
+    type_colors = {"continue":"#f39c12","review":"#e74c3c","start":"#27ae60","done":"#888"}
+
+    st.markdown(f"""
+    <div style="background:linear-gradient(135deg,#0d1b2a,#1a3a5c);border-radius:16px;padding:1.4rem 1.8rem;
+                margin-bottom:1.5rem;border:1px solid #1e3a5f;color:white">
+        <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:#6a8ab0;margin-bottom:.6rem">
+            🗓️ Today's Focus — {today_name}
+        </div>
+        <div style="display:flex;gap:1.5rem;flex-wrap:wrap">
+            <div style="flex:1;min-width:160px">
+                <span style="color:#aaa;font-size:.75rem">🇰🇷 KOREAN</span><br>
+                <span style="color:{type_colors[k_type]};font-size:.82rem;font-weight:600">{type_labels[k_type]}</span>
+                <span style="color:#ddd;font-size:.82rem"> {k_id or ''}</span>
+            </div>
+            <div style="flex:1;min-width:160px">
+                <span style="color:#aaa;font-size:.75rem">⚛️ PHYSICS</span><br>
+                <span style="color:{type_colors[p_type]};font-size:.82rem;font-weight:600">{type_labels[p_type]}</span>
+                <span style="color:#ddd;font-size:.82rem"> {p_id or ''}</span>
+            </div>
+            <div style="flex:1;min-width:160px">
+                <span style="color:#aaa;font-size:.75rem">✈️ RAF</span><br>
+                <span style="color:{type_colors[r_type]};font-size:.82rem;font-weight:600">{type_labels[r_type]}</span>
+                <span style="color:#ddd;font-size:.82rem"> {r_id or ''}</span>
+            </div>
+            <div style="flex:1;min-width:160px;border-left:1px solid #1e3a5f;padding-left:1.2rem">
+                <span style="color:#aaa;font-size:.75rem">⏱ TARGET</span><br>
+                <span style="color:white;font-size:.82rem;font-weight:600">3 × 25 min blocks</span><br>
+                <span style="color:#6a8ab0;font-size:.75rem">~75 min total today</span>
+            </div>
+        </div>
+    </div>""", unsafe_allow_html=True)
 
     # Stats row
     k_lessons = sum(len(u["lessons"]) for u in K_CUR.values())
