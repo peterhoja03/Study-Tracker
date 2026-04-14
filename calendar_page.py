@@ -244,7 +244,7 @@ def _assign_columns(blocks: list) -> list:
     for start, end, b in intervals:
         placed = False
         for ci, col_end in enumerate(col_ends):
-            if start >= col_end:
+            if start >= col_end - 1:
                 col_ends[ci] = end
                 assigned.append((b, ci, start, end))
                 placed = True
@@ -258,7 +258,7 @@ def _assign_columns(blocks: list) -> list:
     for b, ci, start, end in assigned:
         overlapping_cols = set()
         for b2, c2, s2, e2 in assigned:
-            if s2 < end and e2 > start:
+            if s2 < end - 1 and e2 > start + 1:
                 overlapping_cols.add(c2)
         result.append((b, ci, len(overlapping_cols)))
 
