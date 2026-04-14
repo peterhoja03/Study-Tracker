@@ -225,53 +225,42 @@ def _dur_str(minutes: int) -> str:
 
 def _assign_columns(blocks: list) -> list:
     """
-    Given a list of blocks sorted by start_time, assign each block a
-    (col_index, total_cols) so overlapping blocks sit side-by-side.
-    Returns list of (block, col_index, total_cols_in_group).
+    Assign each block a (col_index, total_cols) so overlapping blocks
+    sit side-by-side. Returns list of (block, col_index, total_cols).
     """
-    # Build intervals
+    if not blocks:
+        return []
+
+    # Build (start_min, end_min, block) tuples
     intervals = []
     for b in blocks:
         start = _time_to_min(b.get("start_time", "00:00"))
-        end   = start + b.get("duration_minutes", 25)
-        intervals.append((start, end, b))
+        end   = start + max(b.get("duration_minutes", 25), 1)
+        intervals.append([start, end, b])
 
     # Greedy column assignment
-    col_ends = []   # tracks when each column becomes free
-    assigned = []   # (block, col_index)
+    col_ends = []
+    assigned = []   # (block, col_index, start, end)
     for start, end, b in intervals:
         placed = False
         for ci, col_end in enumerate(col_ends):
             if start >= col_end:
                 col_ends[ci] = end
-                assigned.append((b, ci))
+                assigned.append((b, ci, start, end))
                 placed = True
                 break
         if not placed:
-            assigned.append((b, len(col_ends)))
+            assigned.append((b, len(col_ends), start, end))
             col_ends.append(end)
 
-    # Second pass: find max concurrent cols for each block's time window
+    # Second pass: total_cols = number of distinct col indices among overlapping blocks
     result = []
-    for b, ci in assigned:
-        start = _time_to_min(b.get("start_time", "00:00"))
-        end   = start + b.get("duration_minutes", 25)
-        # count how many blocks overlap with this one
-        max_col = max(
-            c for _, c in assigned
-            if _time_to_min(bb.get("start_time", "00:00")) < end
-            and _time_to_min(bb.get("start_time", "00:00")) + bb.get("duration_minutes", 25) > start
-            for bb in [b2 for b2, c2 in assigned if c2 == c]
-        ) if assigned else 0
-        # simpler: total cols = max col index of any overlapping block + 1
+    for b, ci, start, end in assigned:
         overlapping_cols = set()
-        for b2, c2 in assigned:
-            s2 = _time_to_min(b2.get("start_time", "00:00"))
-            e2 = s2 + b2.get("duration_minutes", 25)
+        for b2, c2, s2, e2 in assigned:
             if s2 < end and e2 > start:
                 overlapping_cols.add(c2)
-        total_cols = len(overlapping_cols)
-        result.append((b, ci, total_cols))
+        result.append((b, ci, len(overlapping_cols)))
 
     return result
 
