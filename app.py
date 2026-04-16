@@ -441,6 +441,15 @@ def page_overview():
     from data.raf_curriculum import RAF_CURRICULUM as R_CUR
 
     st.markdown("# 🎯 Overview")
+    sb = _sb()
+    if sb:
+        try:
+            test = sb.table("progress").select("*").limit(1).execute()
+            st.success(f"✅ Supabase connected — {len(test.data)} rows found")
+        except Exception as e:
+            st.error(f"❌ Supabase query failed: {e}")
+    else:
+        st.error("❌ No Supabase client — check SUPABASE_URL and SUPABASE_KEY in secrets")
     st.markdown(f"*{date.today().strftime('%A, %d %B %Y')}*")
     st.markdown("---")
 
