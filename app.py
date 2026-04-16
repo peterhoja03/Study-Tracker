@@ -103,64 +103,191 @@ def check_password():
 
 def inject_css():
     dark = st.session_state.get("dark_mode", False)
-    bg = "#0d1117" if dark else "#f8f9fa"
-    card_bg = "#161b22" if dark else "white"
-    card_border = "#30363d" if dark else "#f0f0f8"
-    text_col = "#e6edf3" if dark else "#1a1a2e"
-    subtext = "#8b949e" if dark else "#888"
-    recall_bg = "#1f1a00" if dark else "#fffbf0"
-    recall_border = "#5a4a00" if dark else "#f0d060"
-    done_bg = "#0d2318" if dark else "#f8fff9"
-    prog_bg = "#30363d" if dark else "#f0f0f8"
-    today_bg = "#1a2744" if dark else "#f0f7ff"
-    today_border = "#2a4070" if dark else "#d0e4ff"
-    inprog_bg = "#1f1a0a" if dark else "#fffdf5"
+    # ── Colour tokens ──────────────────────────────────────────────────────────
+    bg           = "#0a0e14" if dark else "#f8f9fa"
+    bg2          = "#0d1117" if dark else "#ffffff"
+    card_bg      = "#161b22" if dark else "#ffffff"
+    card_border  = "#30363d" if dark else "#e8e8f0"
+    text_col     = "#e6edf3" if dark else "#1a1a2e"
+    subtext      = "#8b949e" if dark else "#666"
+    recall_bg    = "#1a1500" if dark else "#fffbf0"
+    recall_border= "#5a4a00" if dark else "#f0d060"
+    done_bg      = "#0d2318" if dark else "#f0fff5"
+    prog_bg      = "#21262d" if dark else "#eeeeee"
+    today_bg     = "#0d1f3c" if dark else "#f0f7ff"
+    today_border = "#1e3a5f" if dark else "#c8deff"
+    inprog_bg    = "#1a1400" if dark else "#fffdf0"
+    input_bg     = "#0d1117" if dark else "#ffffff"
+    tab_bg       = "#161b22" if dark else "#f0f2f6"
+    expander_bg  = "#161b22" if dark else "#ffffff"
     st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Playfair+Display:wght@600;700&display=swap');
-    html,body,[class*="css"]{{font-family:'Noto Sans KR',sans-serif;}}
-    #MainMenu,footer,.stDeployButton{{visibility:hidden;display:none;}}
-    .main .block-container{{background:{bg}!important;transition:background .3s;}}
-    .stat-card{{background:{card_bg};border-radius:16px;padding:1.4rem;box-shadow:0 2px 12px rgba(0,0,0,.06);border:1px solid {card_border};text-align:center;}}
-    .stat-number{{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:{text_col};line-height:1;}}
-    .stat-label{{color:{subtext};font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;margin-top:.3rem;}}
-    .lesson-card{{background:{card_bg};border-radius:10px;padding:.9rem 1.1rem;margin-bottom:.5rem;border:1px solid {card_border};border-left:4px solid #ddd;color:{text_col};}}
-    .lesson-card.completed{{border-left-color:#27ae60;background:{done_bg};}}
-    .lesson-card.in_progress{{border-left-color:#f39c12;background:{inprog_bg};}}
-    .badge{{display:inline-block;padding:.18rem .6rem;border-radius:999px;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;}}
-    .badge-completed{{background:#d4f5e2;color:#1a7a42;}}
-    .badge-in_progress{{background:#fff3cd;color:#856404;}}
-    .badge-not_started{{background:{"#21262d" if dark else "#f0f0f8"};color:{subtext};}}
-    .progress-bar-container{{background:{prog_bg};border-radius:999px;height:8px;overflow:hidden;margin:.4rem 0;}}
-    .progress-bar-fill{{height:100%;border-radius:999px;}}
-    .feynman-box{{background:linear-gradient(135deg,#1a1a2e,#0f3460);border-radius:12px;padding:1.5rem;color:white;border-left:4px solid #e94560;}}
-    .recall-box{{background:{recall_bg};border:1px solid {recall_border};border-radius:12px;padding:1.2rem 1.5rem;}}
-    .roadmap-step{{background:{card_bg};border-radius:10px;padding:.9rem 1.2rem;margin-bottom:.5rem;border:1px solid {card_border};border-left:4px solid #3498db;color:{text_col};}}
-    .roadmap-step.done{{border-left-color:#27ae60;background:{done_bg};}}
-    .roadmap-step.current{{border-left-color:#f39c12;background:{inprog_bg};}}
-    .today-card{{background:{today_bg};border:1px solid {today_border};border-radius:12px;padding:1rem 1.2rem;font-size:.88rem;margin-bottom:1rem;color:{text_col};}}
-    .wpp-block{{background:{card_bg};border-radius:8px;padding:.7rem 1rem;margin-bottom:.4rem;border:1px solid {card_border};color:{text_col};}}
-    section[data-testid="stSidebar"]{{background:linear-gradient(180deg,#0d1b2a 0%,#1b2838 60%,#1a3a5c 100%)!important;border-right:1px solid #1e3a5f;}}
+
+    /* ── Global reset ── */
+    html, body, [class*="css"] {{
+        font-family: 'Noto Sans KR', sans-serif !important;
+        background-color: {bg} !important;
+        color: {text_col} !important;
+    }}
+    #MainMenu, footer, .stDeployButton {{ visibility:hidden; display:none; }}
+
+    /* ── Main content area ── */
+    .main, .main > div, .block-container,
+    [data-testid="stAppViewContainer"],
+    [data-testid="stAppViewBlockContainer"],
+    section.main > div {{
+        background-color: {bg} !important;
+    }}
+    .block-container {{ transition: background .3s; }}
+
+    /* ── All text ── */
+    h1,h2,h3,h4,h5,h6,p,span,div,label,li {{
+        color: {text_col} !important;
+    }}
+    .stMarkdown, .stMarkdown p, .stMarkdown span {{ color: {text_col} !important; }}
+
+    /* ── Streamlit native elements ── */
+    .stTextInput > div > div > input,
+    .stTextArea > div > div > textarea,
+    .stNumberInput > div > div > input,
+    .stSelectbox > div > div > div {{
+        background-color: {input_bg} !important;
+        color: {text_col} !important;
+        border-color: {card_border} !important;
+    }}
+    .stButton > button {{
+        background-color: {card_bg} !important;
+        color: {text_col} !important;
+        border-color: {card_border} !important;
+    }}
+    .stButton > button:hover {{
+        border-color: #58a6ff !important;
+        color: #58a6ff !important;
+    }}
+
+    /* ── Tabs ── */
+    .stTabs [data-baseweb="tab-list"] {{
+        background-color: {tab_bg} !important;
+        border-radius: 8px;
+    }}
+    .stTabs [data-baseweb="tab"] {{
+        background-color: transparent !important;
+        color: {subtext} !important;
+    }}
+    .stTabs [aria-selected="true"] {{
+        background-color: {card_bg} !important;
+        color: {text_col} !important;
+    }}
+    .stTabs [data-baseweb="tab-panel"] {{
+        background-color: {bg} !important;
+    }}
+
+    /* ── Expanders ── */
+    [data-testid="stExpander"] {{
+        background-color: {expander_bg} !important;
+        border-color: {card_border} !important;
+    }}
+    [data-testid="stExpander"] summary {{
+        color: {text_col} !important;
+    }}
+
+    /* ── Sliders ── */
+    [data-testid="stSlider"] label {{ color: {text_col} !important; }}
+
+    /* ── Alerts / info boxes ── */
+    [data-testid="stAlert"] {{
+        background-color: {card_bg} !important;
+        color: {text_col} !important;
+    }}
+
+    /* ── Checkboxes ── */
+    .stCheckbox label {{ color: {text_col} !important; }}
+
+    /* ── Metric ── */
+    [data-testid="stMetric"] {{ background: {card_bg} !important; }}
+
+    /* ── Custom cards ── */
+    .stat-card {{
+        background: {card_bg};
+        border-radius: 16px;
+        padding: 1.4rem;
+        box-shadow: 0 2px 12px rgba(0,0,0,.15);
+        border: 1px solid {card_border};
+        text-align: center;
+    }}
+    .stat-number {{
+        font-family: 'Playfair Display', serif;
+        font-size: 2rem;
+        font-weight: 700;
+        color: {text_col} !important;
+        line-height: 1;
+    }}
+    .stat-label {{
+        color: {subtext} !important;
+        font-size: .75rem;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        margin-top: .3rem;
+    }}
+    .lesson-card {{
+        background: {card_bg};
+        border-radius: 10px;
+        padding: .9rem 1.1rem;
+        margin-bottom: .5rem;
+        border: 1px solid {card_border};
+        border-left: 4px solid #555;
+        color: {text_col};
+    }}
+    .lesson-card.completed {{ border-left-color: #27ae60; background: {done_bg}; }}
+    .lesson-card.in_progress {{ border-left-color: #f39c12; background: {inprog_bg}; }}
+    .badge {{ display:inline-block; padding:.18rem .6rem; border-radius:999px; font-size:.7rem; font-weight:600; text-transform:uppercase; letter-spacing:.05em; }}
+    .badge-completed {{ background:#1a4a2e; color:#5fdb8a; }}
+    .badge-in_progress {{ background:#3d2e00; color:#f5c542; }}
+    .badge-not_started {{ background:{prog_bg}; color:{subtext}; }}
+    .progress-bar-container {{ background:{prog_bg}; border-radius:999px; height:8px; overflow:hidden; margin:.4rem 0; }}
+    .progress-bar-fill {{ height:100%; border-radius:999px; }}
+    .feynman-box {{ background:linear-gradient(135deg,#0d1b2a,#0f2d4a); border-radius:12px; padding:1.5rem; color:#e6edf3; border-left:4px solid #e94560; }}
+    .recall-box {{ background:{recall_bg}; border:1px solid {recall_border}; border-radius:12px; padding:1.2rem 1.5rem; }}
+    .roadmap-step {{ background:{card_bg}; border-radius:10px; padding:.9rem 1.2rem; margin-bottom:.5rem; border:1px solid {card_border}; border-left:4px solid #3498db; color:{text_col}; }}
+    .roadmap-step.done {{ border-left-color:#27ae60; background:{done_bg}; }}
+    .roadmap-step.current {{ border-left-color:#f39c12; background:{inprog_bg}; }}
+    .today-card {{ background:{today_bg}; border:1px solid {today_border}; border-radius:12px; padding:1rem 1.2rem; font-size:.88rem; margin-bottom:1rem; color:{text_col}; }}
+    .wpp-block {{ background:{card_bg}; border-radius:8px; padding:.7rem 1rem; margin-bottom:.4rem; border:1px solid {card_border}; color:{text_col}; }}
+
+    /* ── Sidebar (always dark) ── */
+    section[data-testid="stSidebar"] {{
+        background: linear-gradient(180deg,#0d1b2a 0%,#1b2838 60%,#1a3a5c 100%) !important;
+        border-right: 1px solid #1e3a5f;
+    }}
     section[data-testid="stSidebar"] .stMarkdown p,
     section[data-testid="stSidebar"] .stMarkdown h2,
-    section[data-testid="stSidebar"] .stMarkdown h3{{color:#e8eaf0!important;}}
-    section[data-testid="stSidebar"] .stButton button{{background:rgba(255,255,255,.07);color:#e8eaf0;border:1px solid rgba(255,255,255,.12);border-radius:8px;width:100%;text-align:left;transition:all .2s;}}
-    section[data-testid="stSidebar"] .stButton button:hover{{background:rgba(255,255,255,.15);}}
-    @media (max-width:768px){{
-        .block-container{{padding:.8rem .4rem!important;}}
-        .stat-card{{padding:.7rem .3rem!important;}}
-        .stat-number{{font-size:1.2rem!important;}}
-        .stat-label{{font-size:.58rem!important;}}
-        .lesson-card{{padding:.6rem .7rem!important;font-size:.85rem;}}
-        section[data-testid="stSidebar"]{{display:none!important;}}
-        .mobile-nav{{display:flex!important;}}
-        h1{{font-size:1.4rem!important;}}
+    section[data-testid="stSidebar"] .stMarkdown h3 {{ color:#e8eaf0 !important; }}
+    section[data-testid="stSidebar"] .stButton button {{
+        background: rgba(255,255,255,.07);
+        color: #e8eaf0 !important;
+        border: 1px solid rgba(255,255,255,.12);
+        border-radius: 8px;
+        width: 100%;
+        text-align: left;
+        transition: all .2s;
     }}
-    @media (min-width:769px){{
-        .mobile-nav{{display:none!important;}}
+    section[data-testid="stSidebar"] .stButton button:hover {{ background:rgba(255,255,255,.15); }}
+
+    /* ── Mobile ── */
+    @media (max-width:768px) {{
+        .block-container {{ padding:.8rem .4rem !important; }}
+        .stat-card {{ padding:.7rem .3rem !important; }}
+        .stat-number {{ font-size:1.2rem !important; }}
+        .stat-label {{ font-size:.58rem !important; }}
+        .lesson-card {{ padding:.6rem .7rem !important; font-size:.85rem; }}
+        section[data-testid="stSidebar"] {{ display:none !important; }}
+        .mobile-nav {{ display:flex !important; }}
+        h1 {{ font-size:1.4rem !important; }}
     }}
-    .mobile-nav{{display:none;gap:.4rem;margin-bottom:1.2rem;flex-wrap:wrap;padding:.5rem 0;}}
-    .mobile-nav a{{background:{card_bg};color:{text_col};border:1px solid {card_border};border-radius:8px;padding:.5rem .9rem;text-decoration:none;font-size:.82rem;font-weight:600;}}
+    @media (min-width:769px) {{ .mobile-nav {{ display:none !important; }} }}
+    .mobile-nav {{ display:none; gap:.4rem; margin-bottom:1.2rem; flex-wrap:wrap; padding:.5rem 0; }}
+    .mobile-nav a {{ background:{card_bg}; color:{text_col}; border:1px solid {card_border}; border-radius:8px; padding:.5rem .9rem; text-decoration:none; font-size:.82rem; font-weight:600; }}
     </style>
     <div class="mobile-nav">
       <a href="?page=overview">🏠 Home</a>
@@ -896,6 +1023,99 @@ def render_lesson_viewer(lesson, unit_color, unit_level):
                 st.info("Lesson unmarked — back to not started.")
                 st.rerun()
 
+# ─── Subject Reviews Summary ─────────────────────────────────────────────────
+
+def _render_subject_reviews(progress, curriculum, prefix, color, icon):
+    from datetime import timedelta
+    today = date.today()
+    today_str = today.isoformat()
+    lesson_meta = {l["id"]: l for u in curriculum.values() for l in u["lessons"]}
+    due_today = []
+    upcoming = {}
+    for lid, data in progress.items():
+        if not lid.startswith(prefix): continue
+        if data.get("status") != "completed": continue
+        nr = data.get("next_review", "")
+        if not nr: continue
+        if nr <= today_str:
+            due_today.append(lid)
+        else:
+            for i in range(1, 8):
+                check = (today + timedelta(days=i)).isoformat()
+                if nr == check:
+                    upcoming.setdefault(check, []).append(lid)
+                    break
+    if not due_today and not upcoming:
+        return
+    dark = st.session_state.get("dark_mode", False)
+    card_bg = "#161b22" if dark else "#ffffff"
+    card_border = "#30363d" if dark else "#e8e8f0"
+    text_col = "#e6edf3" if dark else "#1a1a2e"
+    st.markdown("### 🔄 Your Reviews")
+    if due_today:
+        st.markdown(
+            f'<span style="background:#e74c3c;color:white;border-radius:999px;'
+            f'padding:.2rem .75rem;font-size:.78rem;font-weight:700">'
+            f'{len(due_today)} due today</span>',
+            unsafe_allow_html=True,
+        )
+        st.markdown("<br>", unsafe_allow_html=True)
+        cols = st.columns(min(len(due_today), 3))
+        for i, lid in enumerate(due_today):
+            lesson = lesson_meta.get(lid, {})
+            rc = progress[lid].get("review_count", 0)
+            with cols[i % 3]:
+                st.markdown(
+                    f'<div style="background:{card_bg};border-radius:10px;padding:.85rem 1rem;'
+                    f'border:1px solid {card_border};border-left:4px solid {color};margin-bottom:.5rem">'
+                    f'<div style="font-size:.7rem;color:{color};font-weight:700;text-transform:uppercase;'
+                    f'letter-spacing:.06em;margin-bottom:.2rem">{icon} Review #{rc}</div>'
+                    f'<div style="font-size:.88rem;font-weight:600;color:{text_col};margin-bottom:.3rem">'
+                    f'{lid} — {lesson.get("title","")}</div>'
+                    f'<div style="font-size:.72rem;color:#aaa">{lesson.get("subtitle","")}</div>'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+                if st.button("Start review →", key=f"subj_rev_{lid}", use_container_width=True):
+                    st.session_state[f"{prefix}_active_lesson"] = lid
+                    st.session_state[f"{prefix}_view"] = "review"
+                    st.rerun()
+    else:
+        st.markdown(
+            f'<div style="background:{"#0d2318" if dark else "#f0fff5"};border:1px solid '
+            f'{"#1a4a2e" if dark else "#c3e6cb"};border-radius:10px;padding:.6rem 1rem;'
+            f'font-size:.86rem;color:{"#5fdb8a" if dark else "#276749"};margin-bottom:.5rem">'
+            f'✅ No reviews due today</div>',
+            unsafe_allow_html=True,
+        )
+    if upcoming:
+        with st.expander("📅 Upcoming — next 7 days"):
+            for i in range(1, 8):
+                day_str = (today + timedelta(days=i)).isoformat()
+                day_lessons = upcoming.get(day_str, [])
+                if not day_lessons: continue
+                day_label = (today + timedelta(days=i)).strftime("%A %d %b")
+                pill_col = "#3498db" if i <= 3 else "#555"
+                st.markdown(
+                    f'<div style="display:flex;align-items:center;gap:.5rem;margin:.5rem 0 .2rem">'
+                    f'<span style="background:{pill_col};color:white;border-radius:999px;'
+                    f'padding:.15rem .65rem;font-size:.72rem;font-weight:700">{day_label}</span>'
+                    f'<span style="font-size:.75rem;color:#aaa">in {i} day{"s" if i>1 else ""}</span>'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+                for lid in day_lessons:
+                    lesson = lesson_meta.get(lid, {})
+                    st.markdown(
+                        f'<div style="background:{card_bg};border-radius:8px;padding:.5rem .9rem;'
+                        f'border:1px solid {card_border};border-left:3px solid {color};'
+                        f'font-size:.84rem;margin-bottom:.3rem;color:{text_col}">'
+                        f'<strong>{lid}</strong> — {lesson.get("title","")}</div>',
+                        unsafe_allow_html=True,
+                    )
+    st.markdown("---")
+
+
 # ─── Generic Subject Page ─────────────────────────────────────────────────────
 
 def render_subject_page(subject_name, curriculum, prefix, color, icon):
@@ -918,6 +1138,10 @@ def render_subject_page(subject_name, curriculum, prefix, color, icon):
             st.session_state[f"{prefix}_view"] = "review"
 
     st.markdown("---")
+
+    # ── Subject-level reviews summary ──────────────────────────────────────────
+    _render_subject_reviews(progress, curriculum, prefix, color, icon)
+
     view = st.session_state[f"{prefix}_view"]
 
     # Curriculum view
