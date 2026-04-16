@@ -120,6 +120,10 @@ def inject_css():
     input_bg     = "#0d1117" if dark else "#ffffff"
     tab_bg       = "#161b22" if dark else "#f0f2f6"
     expander_bg  = "#161b22" if dark else "#ffffff"
+    dark_text_css = """
+    h1,h2,h3,h4,h5,h6,p,span,div,label,li { color: #e6edf3 !important; }
+    .stMarkdown, .stMarkdown p, .stMarkdown span { color: #e6edf3 !important; }
+    """ if dark else ""
     st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Playfair+Display:wght@600;700&display=swap');
@@ -127,8 +131,6 @@ def inject_css():
     /* ── Global reset ── */
     html, body, [class*="css"] {{
         font-family: 'Noto Sans KR', sans-serif !important;
-        background-color: {bg} !important;
-        color: {text_col} !important;
     }}
     #MainMenu, footer, .stDeployButton {{ visibility:hidden; display:none; }}
 
@@ -140,12 +142,7 @@ def inject_css():
         background-color: {bg} !important;
     }}
     .block-container {{ transition: background .3s; }}
-
-    /* ── All text ── */
-    h1,h2,h3,h4,h5,h6,p,span,div,label,li {{
-        color: {text_col} !important;
-    }}
-    .stMarkdown, .stMarkdown p, .stMarkdown span {{ color: {text_col} !important; }}
+    {dark_text_css}
 
     /* ── Streamlit native elements ── */
     .stTextInput > div > div > input,
