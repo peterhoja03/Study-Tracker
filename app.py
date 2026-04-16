@@ -257,21 +257,23 @@ def inject_css():
         background: linear-gradient(180deg,#0d1b2a 0%,#1b2838 60%,#1a3a5c 100%) !important;
         border-right: 1px solid #1e3a5f;
     }}
-    section[data-testid="stSidebar"],
-    section[data-testid="stSidebar"] * {{ color:#e8eaf0 !important; }}
-    section[data-testid="stSidebar"] .stMarkdown p,
-    section[data-testid="stSidebar"] .stMarkdown h2,
-    section[data-testid="stSidebar"] .stMarkdown h3 {{ color:#e8eaf0 !important; }}
+    section[data-testid="stSidebar"] p,
+    section[data-testid="stSidebar"] span,
+    section[data-testid="stSidebar"] label,
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3,
+    section[data-testid="stSidebar"] div {{ color:#e8eaf0 !important; }}
     section[data-testid="stSidebar"] .stButton button {{
-        background: rgba(255,255,255,.07);
+        background: rgba(255,255,255,.07) !important;
         color: #e8eaf0 !important;
-        border: 1px solid rgba(255,255,255,.12);
+        border: 1px solid rgba(255,255,255,.12) !important;
         border-radius: 8px;
         width: 100%;
         text-align: left;
         transition: all .2s;
     }}
-    section[data-testid="stSidebar"] .stButton button:hover {{ background:rgba(255,255,255,.15); }}
+    section[data-testid="stSidebar"] .stButton button:hover {{ background:rgba(255,255,255,.15) !important; }}
 
     /* ── Mobile ── */
     @media (max-width:768px) {{
