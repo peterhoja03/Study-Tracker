@@ -134,20 +134,8 @@ def _sb():
             from supabase import create_client
             url = st.secrets.get("SUPABASE_URL","")
             key = st.secrets.get("SUPABASE_KEY","")
-            if not url:
-                st.session_state["_sb_error"] = "SUPABASE_URL is missing or empty"
-                st.session_state["supabase_client"] = None
-            elif not key:
-                st.session_state["_sb_error"] = "SUPABASE_KEY is missing or empty"
-                st.session_state["supabase_client"] = None
-            else:
-                st.session_state["supabase_client"] = create_client(url, key)
-                st.session_state["_sb_error"] = None
-        except ImportError as e:
-            st.session_state["_sb_error"] = f"supabase package not installed: {e}"
-            st.session_state["supabase_client"] = None
-        except Exception as e:
-            st.session_state["_sb_error"] = f"Supabase init error: {e}"
+            st.session_state["supabase_client"] = create_client(url,key) if url and key else None
+        except Exception:
             st.session_state["supabase_client"] = None
     return st.session_state["supabase_client"]
 
@@ -453,16 +441,6 @@ def page_overview():
     from data.raf_curriculum import RAF_CURRICULUM as R_CUR
 
     st.markdown("# 🎯 Overview")
-    sb = _sb()
-    if sb:
-        try:
-            test = sb.table("progress").select("*").limit(1).execute()
-            st.success(f"✅ Supabase connected — {len(test.data)} rows found")
-        except Exception as e:
-            st.error(f"❌ Supabase query failed: {e}")
-    else:
-        err = st.session_state.get("_sb_error", "Unknown error")
-        st.error(f"❌ Supabase connection failed: {err}")
     st.markdown(f"*{date.today().strftime('%A, %d %B %Y')}*")
     st.markdown("---")
 
