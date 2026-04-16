@@ -516,6 +516,7 @@ def render_sidebar():
 # ─── Reviews Panel ───────────────────────────────────────────────────────────
 
 def _render_reviews_panel(all_prog, K_CUR, P_CUR, R_CUR):
+    _t = _theme()
     from datetime import timedelta
 
     # Build a lookup: lesson_id -> (title, subject_name, subject_icon, page_key)
@@ -1052,6 +1053,7 @@ def render_lesson_viewer(lesson, unit_color, unit_level):
 # ─── Subject Reviews Summary ─────────────────────────────────────────────────
 
 def _render_subject_reviews(progress, curriculum, prefix, color, icon):
+    _t = _theme()
     from datetime import timedelta
     today = date.today()
     today_str = today.isoformat()
