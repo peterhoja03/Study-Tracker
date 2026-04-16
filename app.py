@@ -17,10 +17,24 @@ st.set_page_config(
 
 # ─── Password ────────────────────────────────────────────────────────────────
 
+SESSION_DURATION_HOURS = 2
+
 def check_password():
+    from datetime import datetime
     def _hash(pw): return hashlib.sha256(pw.encode()).hexdigest()
     stored = st.secrets.get("app_password_hash") or _hash(os.environ.get("TRACKER_PASSWORD","study2024"))
-    if st.session_state.get("authenticated"): return True
+
+    # Check if already authenticated and within the 2-hour window
+    if st.session_state.get("authenticated"):
+        login_time = st.session_state.get("login_time")
+        if login_time:
+            elapsed = (datetime.now() - login_time).total_seconds() / 3600
+            if elapsed < SESSION_DURATION_HOURS:
+                return True
+        # Session expired — clear auth
+        st.session_state.authenticated = False
+        st.session_state.pop("login_time", None)
+
     col1,col2,col3 = st.columns([1,2,1])
     with col2:
         st.markdown("""
@@ -36,6 +50,7 @@ def check_password():
             if st.form_submit_button("→ Enter", use_container_width=True):
                 if _hash(pw) == stored:
                     st.session_state.authenticated = True
+                    st.session_state.login_time = datetime.now()
                     st.rerun()
                 else:
                     st.error("Incorrect password.")
@@ -126,17 +141,17 @@ def _sb():
 
 def load_progress(prefix=""):
     sb = _sb()
-    key = f"_progress_{prefix}"
-    if sb:
+    # Fetch from Supabase once per session and cache locally
+    if sb and "_progress_cache" not in st.session_state:
         try:
             res = sb.table("progress").select("*").execute()
-            all_rows = {row["lesson_id"]: row for row in res.data}
-            if prefix:
-                return {k:v for k,v in all_rows.items() if k.startswith(prefix)}
-            return all_rows
+            st.session_state["_progress_cache"] = {row["lesson_id"]: row for row in res.data}
         except Exception:
-            pass
-    return st.session_state.get(key, {})
+            st.session_state["_progress_cache"] = {}
+    cache = st.session_state.get("_progress_cache", {})
+    if prefix:
+        return {k: v for k, v in cache.items() if k.startswith(prefix)}
+    return cache
 
 def _upsert(lesson_id, fields):
     from datetime import datetime
@@ -144,17 +159,14 @@ def _upsert(lesson_id, fields):
     fields["lesson_id"] = lesson_id
     fields["updated_at"] = datetime.now().isoformat()
     if sb:
-        try: sb.table("progress").upsert(fields).execute()
-        except Exception: pass
-    prefix = lesson_id[:1] if lesson_id else ""
-    key = f"_progress_{prefix}"
-    prog = st.session_state.get(key, {})
-    prog.setdefault(lesson_id, {}).update(fields)
-    st.session_state[key] = prog
-    # also update full cache
-    full = st.session_state.get("_progress_", {})
-    full.setdefault(lesson_id, {}).update(fields)
-    st.session_state["_progress_"] = full
+        try:
+            sb.table("progress").upsert(fields).execute()
+        except Exception:
+            pass
+    # Update a single consistent cache key used by load_progress
+    cache = st.session_state.get("_progress_cache", {})
+    cache.setdefault(lesson_id, {}).update(fields)
+    st.session_state["_progress_cache"] = cache
 
 def mark_complete(lesson_id, score=None, time_spent=25):
     SR = {0:1,1:3,2:7,3:14,4:30,5:90}
