@@ -18,22 +18,63 @@ st.set_page_config(
 # ─── Password ────────────────────────────────────────────────────────────────
 
 SESSION_DURATION_HOURS = 2
+_SESSION_KEY = "tracker_session"
+
+def _get_session_table():
+    """Return a single-row 'sessions_auth' table value from Supabase, or None."""
+    sb = _sb()
+    if sb:
+        try:
+            res = sb.table("auth_session").select("*").eq("id", 1).execute()
+            return res.data[0] if res.data else None
+        except Exception:
+            return None
+    return None
+
+def _save_session_to_db(login_time_iso):
+    sb = _sb()
+    if sb:
+        try:
+            sb.table("auth_session").upsert({"id": 1, "login_time": login_time_iso}).execute()
+        except Exception:
+            pass
+
+def _clear_session_from_db():
+    sb = _sb()
+    if sb:
+        try:
+            sb.table("auth_session").delete().eq("id", 1).execute()
+        except Exception:
+            pass
 
 def check_password():
     from datetime import datetime
     def _hash(pw): return hashlib.sha256(pw.encode()).hexdigest()
     stored = st.secrets.get("app_password_hash") or _hash(os.environ.get("TRACKER_PASSWORD","study2024"))
 
-    # Check if already authenticated and within the 2-hour window
+    # Check Supabase for a persisted login session
+    if not st.session_state.get("authenticated"):
+        row = _get_session_table()
+        if row and row.get("login_time"):
+            try:
+                login_time = datetime.fromisoformat(row["login_time"])
+                elapsed = (datetime.now() - login_time).total_seconds() / 3600
+                if elapsed < SESSION_DURATION_HOURS:
+                    st.session_state.authenticated = True
+                    st.session_state.login_time = login_time
+            except Exception:
+                pass
+
     if st.session_state.get("authenticated"):
         login_time = st.session_state.get("login_time")
         if login_time:
             elapsed = (datetime.now() - login_time).total_seconds() / 3600
             if elapsed < SESSION_DURATION_HOURS:
                 return True
-        # Session expired — clear auth
+        # Session expired
         st.session_state.authenticated = False
         st.session_state.pop("login_time", None)
+        _clear_session_from_db()
 
     col1,col2,col3 = st.columns([1,2,1])
     with col2:
@@ -49,8 +90,10 @@ def check_password():
             pw = st.text_input("Password", type="password", placeholder="Enter password...", label_visibility="collapsed")
             if st.form_submit_button("→ Enter", use_container_width=True):
                 if _hash(pw) == stored:
+                    now = datetime.now()
                     st.session_state.authenticated = True
-                    st.session_state.login_time = datetime.now()
+                    st.session_state.login_time = now
+                    _save_session_to_db(now.isoformat())
                     st.rerun()
                 else:
                     st.error("Incorrect password.")
@@ -315,6 +358,8 @@ def render_sidebar():
 
         if st.button("🔒  Log Out", use_container_width=True):
             st.session_state.authenticated = False
+            st.session_state.pop("login_time", None)
+            _clear_session_from_db()
             st.rerun()
 
 # ─── Reviews Panel ───────────────────────────────────────────────────────────
