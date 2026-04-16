@@ -161,12 +161,18 @@ def _upsert(lesson_id, fields):
     if sb:
         try:
             sb.table("progress").upsert(fields).execute()
+            # Invalidate cache so next load_progress re-fetches fresh from Supabase
+            st.session_state.pop("_progress_cache", None)
         except Exception:
-            pass
-    # Update a single consistent cache key used by load_progress
-    cache = st.session_state.get("_progress_cache", {})
-    cache.setdefault(lesson_id, {}).update(fields)
-    st.session_state["_progress_cache"] = cache
+            # Write failed — update cache locally so session still reflects the change
+            cache = st.session_state.get("_progress_cache", {})
+            cache.setdefault(lesson_id, {}).update(fields)
+            st.session_state["_progress_cache"] = cache
+    else:
+        # No Supabase — update cache locally
+        cache = st.session_state.get("_progress_cache", {})
+        cache.setdefault(lesson_id, {}).update(fields)
+        st.session_state["_progress_cache"] = cache
 
 def mark_complete(lesson_id, score=None, time_spent=25):
     SR = {0:1,1:3,2:7,3:14,4:30,5:90}
