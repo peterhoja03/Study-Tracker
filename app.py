@@ -311,6 +311,128 @@ def render_sidebar():
             st.session_state.authenticated = False
             st.rerun()
 
+# ─── Reviews Panel ───────────────────────────────────────────────────────────
+
+def _render_reviews_panel(all_prog, K_CUR, P_CUR, R_CUR):
+    from datetime import timedelta
+
+    # Build a lookup: lesson_id -> (title, subject_name, subject_icon, page_key)
+    lesson_meta = {}
+    for cur, subj, icon, page_key in [
+        (K_CUR, "Korean",  "🇰🇷", "korean"),
+        (P_CUR, "Physics", "⚛️",  "physics"),
+        (R_CUR, "RAF",     "✈️",  "raf"),
+    ]:
+        for unit_data in cur.values():
+            for l in unit_data["lessons"]:
+                lesson_meta[l["id"]] = (l["title"], subj, icon, page_key)
+
+    today = date.today()
+    today_str = today.isoformat()
+
+    # Collect due today and upcoming (next 7 days)
+    due_today = []
+    upcoming = {}  # date_str -> list of lesson_ids
+    for lid, data in all_prog.items():
+        if data.get("status") != "completed":
+            continue
+        nr = data.get("next_review", "")
+        if not nr:
+            continue
+        if nr <= today_str:
+            due_today.append(lid)
+        else:
+            for i in range(1, 8):
+                check = (today + timedelta(days=i)).isoformat()
+                if nr == check:
+                    upcoming.setdefault(check, []).append(lid)
+                    break
+
+    total_due = len(due_today)
+    has_upcoming = any(upcoming.values())
+
+    if total_due == 0 and not has_upcoming:
+        return  # Nothing to show — keep overview clean
+
+    subj_colors = {"Korean": "#e74c3c", "Physics": "#3498db", "RAF": "#1a3a6e"}
+
+    st.markdown("### 🔄 Reviews")
+
+    # ── Today's due ──
+    if total_due > 0:
+        st.markdown(
+            f'<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.6rem">'
+            f'<span style="background:#e74c3c;color:white;border-radius:999px;padding:.2rem .75rem;'
+            f'font-size:.78rem;font-weight:700">{total_due} due today</span></div>',
+            unsafe_allow_html=True,
+        )
+        cols = st.columns(min(total_due, 3)) if total_due <= 3 else st.columns(3)
+        for i, lid in enumerate(due_today):
+            meta = lesson_meta.get(lid, (lid, "Unknown", "📚", "overview"))
+            title, subj, icon, page_key = meta
+            rc = all_prog[lid].get("review_count", 0)
+            color = subj_colors.get(subj, "#888")
+            col = cols[i % 3]
+            with col:
+                st.markdown(
+                    f'<div style="background:white;border-radius:10px;padding:.85rem 1rem;'
+                    f'border:1px solid #eee;border-left:4px solid {color};margin-bottom:.5rem">'
+                    f'<div style="font-size:.7rem;color:{color};font-weight:700;text-transform:uppercase;'
+                    f'letter-spacing:.06em;margin-bottom:.2rem">{icon} {subj}</div>'
+                    f'<div style="font-size:.88rem;font-weight:600;color:#1a1a2e;margin-bottom:.4rem">'
+                    f'{lid} — {title}</div>'
+                    f'<div style="font-size:.72rem;color:#aaa">Review #{rc + 1}</div>'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+                if st.button(f"Start review →", key=f"ovw_rev_{lid}", use_container_width=True):
+                    st.session_state.current_page = page_key
+                    st.session_state[f"{page_key[0].upper()}_active_lesson"] = lid
+                    st.session_state[f"{page_key[0].upper()}_view"] = "review"
+                    st.rerun()
+    else:
+        st.markdown(
+            '<div style="background:#f0fff4;border:1px solid #c3e6cb;border-radius:10px;'
+            'padding:.7rem 1.1rem;font-size:.88rem;color:#276749;margin-bottom:.6rem">'
+            '✅ No reviews due today — great work!</div>',
+            unsafe_allow_html=True,
+        )
+
+    # ── Upcoming (next 7 days) ──
+    if has_upcoming:
+        with st.expander(f"📅 Upcoming reviews — next 7 days"):
+            for i in range(1, 8):
+                day_str = (today + timedelta(days=i)).isoformat()
+                day_lessons = upcoming.get(day_str, [])
+                if not day_lessons:
+                    continue
+                day_label = (today + timedelta(days=i)).strftime("%A %d %b")
+                days_away = i
+                pill_col = "#3498db" if days_away <= 3 else "#888"
+                st.markdown(
+                    f'<div style="display:flex;align-items:center;gap:.5rem;margin:.6rem 0 .3rem">'
+                    f'<span style="background:{pill_col};color:white;border-radius:999px;'
+                    f'padding:.15rem .65rem;font-size:.72rem;font-weight:700">{day_label}</span>'
+                    f'<span style="font-size:.75rem;color:#aaa">in {days_away} day{"s" if days_away>1 else ""}</span>'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+                for lid in day_lessons:
+                    meta = lesson_meta.get(lid, (lid, "Unknown", "📚", "overview"))
+                    title, subj, icon, page_key = meta
+                    color = subj_colors.get(subj, "#888")
+                    st.markdown(
+                        f'<div style="background:white;border-radius:8px;padding:.55rem .9rem;'
+                        f'border:1px solid #eee;border-left:3px solid {color};'
+                        f'font-size:.84rem;margin-bottom:.3rem;color:#1a1a2e">'
+                        f'{icon} <strong>{lid}</strong> — {title} '
+                        f'<span style="color:#aaa;font-size:.75rem">({subj})</span></div>',
+                        unsafe_allow_html=True,
+                    )
+
+    st.markdown("---")
+
+
 # ─── Overview Page ────────────────────────────────────────────────────────────
 
 def page_overview():
@@ -412,6 +534,11 @@ def page_overview():
     ]:
         with col:
             st.markdown(f'<div class="stat-card"><div class="stat-number">{num}</div><div class="stat-label">{label}</div></div>', unsafe_allow_html=True)
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    # ── Reviews Section ──
+    _render_reviews_panel(all_prog, K_CUR, P_CUR, R_CUR)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
