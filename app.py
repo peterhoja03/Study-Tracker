@@ -257,6 +257,7 @@ def inject_css():
         background: linear-gradient(180deg,#0d1b2a 0%,#1b2838 60%,#1a3a5c 100%) !important;
         border-right: 1px solid #1e3a5f;
     }}
+    section[data-testid="stSidebar"] * {{ color:#e8eaf0 !important; }}
     section[data-testid="stSidebar"] .stMarkdown p,
     section[data-testid="stSidebar"] .stMarkdown h2,
     section[data-testid="stSidebar"] .stMarkdown h3 {{ color:#e8eaf0 !important; }}
@@ -294,34 +295,6 @@ def inject_css():
     </div>
     """, unsafe_allow_html=True)
 
-
-def _theme():
-    """Return current theme colour tokens for use in inline styles."""
-    dark = st.session_state.get("dark_mode", False)
-    return {
-        "card_bg":      "#161b22" if dark else "#ffffff",
-        "card_border":  "#30363d" if dark else "#e8e8f0",
-        "text":         "#e6edf3" if dark else "#1a1a2e",
-        "subtext":      "#8b949e" if dark else "#666666",
-        "input_bg":     "#0d1117" if dark else "#ffffff",
-        "done_bg":      "#0d2318" if dark else "#f0fff5",
-        "done_border":  "#1a4a2e" if dark else "#c3e6cb",
-        "done_text":    "#5fdb8a" if dark else "#276749",
-        "warn_bg":      "#3d2e00" if dark else "#fffbf0",
-        "warn_border":  "#5a4a00" if dark else "#f0d060",
-        "info_bg":      "#0d1f3c" if dark else "#e8f4ff",
-        "info_border":  "#1e3a5f" if dark else "#3a8fd9",
-        "pill_bg":      "#21262d" if dark else "#f0f4ff",
-        "pill_border":  "#30363d" if dark else "#d0d8f8",
-        "feynman_bg":   "#0d1f3c" if dark else "#fff8f0",
-        "recall_bg":    "#1a1500" if dark else "#f8f9ff",
-        "recall_border":"#30363d" if dark else "#d0d8f8",
-        "complete_bg":  "#0d1f3c" if dark else "#f8f9ff",
-        "complete_border":"#1e3a5f" if dark else "#d0d8f8",
-        "tag_bg":       "#21262d" if dark else "#f0f4ff",
-        "tag_border":   "#30363d" if dark else "#d0d8f8",
-        "tag_text":     "#58a6ff" if dark else "#3a5bd9",
-    }
 
 def _sb():
     if "supabase_client" not in st.session_state:
@@ -595,8 +568,8 @@ def _render_reviews_panel(all_prog, K_CUR, P_CUR, R_CUR):
                     st.rerun()
     else:
         st.markdown(
-            '<div style="background:#f0fff4;border:1px solid #c3e6cb;border-radius:10px;'
-            'padding:.7rem 1.1rem;font-size:.88rem;color:#276749;margin-bottom:.6rem">'
+            f'<div style="background:{"#0d2318" if st.session_state.get("dark_mode") else "#f0fff4"};border:1px solid {"#1a4a2e" if st.session_state.get("dark_mode") else "#c3e6cb"};border-radius:10px;'
+            f'padding:.7rem 1.1rem;font-size:.88rem;color:{"#5fdb8a" if st.session_state.get("dark_mode") else "#276749"};margin-bottom:.6rem">'
             '✅ No reviews due today — great work!</div>',
             unsafe_allow_html=True,
         )
@@ -639,7 +612,6 @@ def _render_reviews_panel(all_prog, K_CUR, P_CUR, R_CUR):
 # ─── Overview Page ────────────────────────────────────────────────────────────
 
 def page_overview():
-    _t = _theme()
     from data.korean_curriculum import CURRICULUM as K_CUR
     from data.physics_curriculum import PHYSICS_CURRICULUM as P_CUR
     from data.raf_curriculum import RAF_CURRICULUM as R_CUR
@@ -765,8 +737,8 @@ def page_overview():
             due_count = len(get_due(prefix))
 
             st.markdown(f"""
-            <div style="background:{_t['card_bg']};border-radius:14px;padding:1.2rem 1.5rem;margin-bottom:.8rem;
-                        border:1px solid {_t['card_border']};border-left:5px solid {color};">
+            <div style="background:white;border-radius:14px;padding:1.2rem 1.5rem;margin-bottom:.8rem;
+                        border:1px solid #eee;border-left:5px solid {color};">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
                     <span style="font-weight:700;font-size:1rem">{name}</span>
                     <span style="font-size:.82rem;color:#888">{done_s}/{total} lessons · {pct}%</span>
@@ -912,7 +884,6 @@ def page_overview():
 # ─── Generic Lesson Viewer (shared by all subjects) ──────────────────────────
 
 def render_lesson_viewer(lesson, unit_color, unit_level):
-    _t = _theme()
     lesson_id = lesson["id"]
     progress = load_progress()
     lesson_prog = progress.get(lesson_id, {})
@@ -946,7 +917,7 @@ def render_lesson_viewer(lesson, unit_color, unit_level):
             for i,goal in enumerate(lesson["learning_goals"],1):
                 st.markdown(f"""
                 <div style="display:flex;gap:.75rem;align-items:flex-start;padding:.65rem;
-                            background:{_t['recall_bg']};border-radius:8px;margin-bottom:.4rem">
+                            background:#f8f9ff;border-radius:8px;margin-bottom:.4rem">
                     <span style="background:{unit_color};color:white;border-radius:50%;width:20px;height:20px;
                                  display:inline-flex;align-items:center;justify-content:center;font-size:.7rem;
                                  font-weight:700;flex-shrink:0">{i}</span>
@@ -955,7 +926,7 @@ def render_lesson_viewer(lesson, unit_color, unit_level):
 
             st.markdown("### 📖 Key Vocabulary")
             vocab_html = " ".join([
-                f'<span style="background:{_t["tag_bg"]};border:1px solid {_t["tag_border"]};border-radius:6px;'
+                f'<span style="background:#f0f4ff;border:1px solid #d0d8f8;border-radius:6px;'
                 f'padding:.25rem .65rem;margin:.15rem;display:inline-block;font-size:.85rem">{v}</span>'
                 for v in lesson.get("key_vocab",[])
             ])
@@ -966,11 +937,11 @@ def render_lesson_viewer(lesson, unit_color, unit_level):
             icons = {"Active Recall":"🧠","Spaced Repetition":"🔄","Feynman Technique":"✍️",
                      "Writing Practice":"📝","Pattern Recognition":"🔍","Sentence Building":"🔨"}
             for t in lesson.get("techniques",[]):
-                st.markdown(f'<div style="background:{_t["card_bg"]};border:1px solid {_t["card_border"]};border-radius:8px;padding:.45rem .85rem;margin-bottom:.3rem;font-size:.86rem;color:{_t["text"]}">{icons.get(t,"💡")} {t}</div>', unsafe_allow_html=True)
+                st.markdown(f'<div style="background:white;border:1px solid #eee;border-radius:8px;padding:.45rem .85rem;margin-bottom:.3rem;font-size:.86rem">{icons.get(t,"💡")} {t}</div>', unsafe_allow_html=True)
 
             st.markdown("### 🔗 Resources")
             for r in lesson.get("resources",[]):
-                st.markdown(f'<a href="{r["url"]}" target="_blank" style="display:inline-block;background:{_t["tag_bg"]};color:{_t["tag_text"]};padding:.3rem .8rem;border-radius:999px;text-decoration:none;font-size:.8rem;border:1px solid {_t["tag_border"]};margin:.15rem">↗ {r["name"]}</a>', unsafe_allow_html=True)
+                st.markdown(f'<a href="{r["url"]}" target="_blank" style="display:inline-block;background:#f0f4ff;color:#3a5bd9;padding:.3rem .8rem;border-radius:999px;text-decoration:none;font-size:.8rem;border:1px solid #d0d8f8;margin:.15rem">↗ {r["name"]}</a>', unsafe_allow_html=True)
 
         if status == "not_started":
             st.markdown("<br>",unsafe_allow_html=True)
@@ -981,7 +952,7 @@ def render_lesson_viewer(lesson, unit_color, unit_level):
 
     with tab2:
         st.markdown("### 🧠 Active Recall")
-        st.markdown(f'<div style="background:{_t["info_bg"]};border-left:4px solid {_t["info_border"]};border-radius:0 8px 8px 0;padding:.85rem 1.2rem;margin-bottom:1.4rem;font-size:.86rem;color:{_t["text"]}"><strong>Protocol:</strong> Answer each question OUT LOUD or in writing <em>before</em> expanding. Struggling = learning.</div>', unsafe_allow_html=True)
+        st.markdown('<div style="background:#e8f4ff;border-left:4px solid #3a8fd9;border-radius:0 8px 8px 0;padding:.85rem 1.2rem;margin-bottom:1.4rem;font-size:.86rem"><strong>Protocol:</strong> Answer each question OUT LOUD or in writing <em>before</em> expanding. Struggling = learning.</div>', unsafe_allow_html=True)
         for i,q in enumerate(lesson.get("active_recall_questions",[]),1):
             st.markdown(f'<div class="recall-box" style="margin-bottom:.7rem"><strong>Q{i}.</strong> {q}</div>', unsafe_allow_html=True)
             with st.expander(f"→ Answer space for Q{i}"):
@@ -1001,7 +972,7 @@ def render_lesson_viewer(lesson, unit_color, unit_level):
                 <li>Re-explain until complete and clear</li>
             </ol>
         </div>""", unsafe_allow_html=True)
-        st.markdown(f'<div style="background:{_t["feynman_bg"]};border:2px solid #e94560;border-radius:12px;padding:1.2rem 1.4rem;font-size:.93rem;margin-bottom:1rem;color:{_t["text"]}"><strong>Your prompt:</strong><br><br>{lesson["feynman_prompt"]}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div style="background:#fff8f0;border:2px solid #e94560;border-radius:12px;padding:1.2rem 1.4rem;font-size:.93rem;margin-bottom:1rem"><strong>Your prompt:</strong><br><br>{lesson["feynman_prompt"]}</div>', unsafe_allow_html=True)
         feyn = st.text_area("Your explanation:", key=f"feyn_{lesson_id}", height=180, placeholder="Explain simply. Use examples. If you can't, you don't know it yet.")
         c1,c2 = st.columns(2)
         with c1:
@@ -1028,7 +999,7 @@ def render_lesson_viewer(lesson, unit_color, unit_level):
         st.markdown("### ✅ Mark Complete")
         if status == "completed":
             st.success(f"✅ Completed: {lesson_prog.get('completed_date','?')} | Next review: **{lesson_prog.get('next_review','?')}** | Reviews done: {lesson_prog.get('review_count',0)}")
-        st.markdown(f'<div style="background:{_t["complete_bg"]};border:1px solid {_t["complete_border"]};border-radius:12px;padding:1.2rem;margin-bottom:1rem;color:{_t["text"]}"><strong>Before completing, confirm:</strong></div>', unsafe_allow_html=True)
+        st.markdown('<div style="background:#f8f9ff;border:1px solid #d0d8f8;border-radius:12px;padding:1.2rem;margin-bottom:1rem"><strong>Before completing, confirm:</strong></div>', unsafe_allow_html=True)
         for item in ["Read/watched the full resource","Answered all active recall questions honestly","Completed the Feynman exercise","Can explain the key concepts without notes"]:
             st.checkbox(item, key=f"cc_{lesson_id}_{item[:12]}")
         c1,c2,c3 = st.columns(3)
