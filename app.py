@@ -940,13 +940,13 @@ def render_lesson_viewer(lesson, unit_color, unit_level):
         </div>
     </div>""", unsafe_allow_html=True)
 
-    tab1,tab2,tab3,tab4,tab5 = st.tabs(["📋 Goals & Vocab","🧠 Active Recall","✍️ Feynman","📝 Notes","✅ Mark Complete"])
+    tab1, tab2, tab3 = st.tabs(["📋 Goals & Vocab", "📝 Notes", "✅ Mark Complete"])
 
     with tab1:
-        c1,c2 = st.columns([3,2])
+        c1, c2 = st.columns([3, 2])
         with c1:
             st.markdown("### 🎯 Learning Goals")
-            for i,goal in enumerate(lesson["learning_goals"],1):
+            for i, goal in enumerate(lesson["learning_goals"], 1):
                 st.markdown(f"""
                 <div style="display:flex;gap:.75rem;align-items:flex-start;padding:.65rem;
                             background:#f8f9ff;border-radius:8px;margin-bottom:.4rem">
@@ -960,85 +960,67 @@ def render_lesson_viewer(lesson, unit_color, unit_level):
             vocab_html = " ".join([
                 f'<span style="background:#f0f4ff;border:1px solid #d0d8f8;border-radius:6px;'
                 f'padding:.25rem .65rem;margin:.15rem;display:inline-block;font-size:.85rem">{v}</span>'
-                for v in lesson.get("key_vocab",[])
+                for v in lesson.get("key_vocab", [])
             ])
             st.markdown(f"<div style='line-height:2.4'>{vocab_html}</div>", unsafe_allow_html=True)
 
         with c2:
-            st.markdown("### 🛠️ Techniques")
-            icons = {"Active Recall":"🧠","Spaced Repetition":"🔄","Feynman Technique":"✍️",
-                     "Writing Practice":"📝","Pattern Recognition":"🔍","Sentence Building":"🔨"}
-            for t in lesson.get("techniques",[]):
-                st.markdown(f'<div style="background:{_t["card_bg"]};border:1px solid {_t["card_border"]};border-radius:8px;padding:.45rem .85rem;margin-bottom:.3rem;font-size:.86rem;color:{_t["text"]}">{icons.get(t,"💡")} {t}</div>', unsafe_allow_html=True)
-
             st.markdown("### 🔗 Resources")
-            for r in lesson.get("resources",[]):
-                st.markdown(f'<a href="{r["url"]}" target="_blank" style="display:inline-block;background:#f0f4ff;color:#3a5bd9;padding:.3rem .8rem;border-radius:999px;text-decoration:none;font-size:.8rem;border:1px solid #d0d8f8;margin:.15rem">↗ {r["name"]}</a>', unsafe_allow_html=True)
+            for r in lesson.get("resources", []):
+                st.markdown(
+                    f'<a href="{r["url"]}" target="_blank" style="display:inline-block;background:#f0f4ff;'
+                    f'color:#3a5bd9;padding:.3rem .8rem;border-radius:999px;text-decoration:none;'
+                    f'font-size:.8rem;border:1px solid #d0d8f8;margin:.15rem">↗ {r["name"]}</a>',
+                    unsafe_allow_html=True,
+                )
 
         if status == "not_started":
-            st.markdown("<br>",unsafe_allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
             if st.button("▶️ Start This Lesson", use_container_width=True, key=f"start_{lesson_id}"):
                 mark_in_progress(lesson_id)
                 st.success("Lesson started!")
                 st.rerun()
 
     with tab2:
-        st.markdown("### 🧠 Active Recall")
-        st.markdown(f'<div style="background:{_t["info_bg"]};border-left:4px solid {_t["info_border"]};border-radius:0 8px 8px 0;padding:.85rem 1.2rem;margin-bottom:1.4rem;font-size:.86rem;color:{_t["text"]}"><strong>Protocol:</strong> Answer each question OUT LOUD or in writing <em>before</em> expanding. Struggling = learning.</div>', unsafe_allow_html=True)
-        for i,q in enumerate(lesson.get("active_recall_questions",[]),1):
-            st.markdown(f'<div class="recall-box" style="margin-bottom:.7rem"><strong>Q{i}.</strong> {q}</div>', unsafe_allow_html=True)
-            with st.expander(f"→ Answer space for Q{i}"):
-                st.text_area("Your answer:", key=f"ar_{lesson_id}_{i}", height=80, placeholder="Write before checking...")
-                st.markdown(f'<a href="{lesson["url"]}" target="_blank" style="font-size:.82rem;color:#3a5bd9">↗ Verify in resource</a>', unsafe_allow_html=True)
-
-    with tab3:
-        st.markdown("### ✍️ Feynman Technique")
-        st.markdown("""
-        <div class="feynman-box" style="margin-bottom:1.4rem">
-            <h4 style="color:#ff6b6b;margin:0 0 .5rem">The Feynman Method</h4>
-            <ol style="margin:0;padding-left:1.2rem;line-height:1.8;font-size:.88rem">
-                <li>Study the concept in the resource</li>
-                <li>Close it — explain simply, as if teaching a 10-year-old</li>
-                <li>Find where your explanation breaks down (that's your gap)</li>
-                <li>Re-read only that part</li>
-                <li>Re-explain until complete and clear</li>
-            </ol>
-        </div>""", unsafe_allow_html=True)
-        st.markdown(f'<div style="background:{_t["feynman_bg"]};border:2px solid #e94560;border-radius:12px;padding:1.2rem 1.4rem;font-size:.93rem;margin-bottom:1rem;color:{_t["text"]}"><strong>Your prompt:</strong><br><br>{lesson["feynman_prompt"]}</div>', unsafe_allow_html=True)
-        feyn = st.text_area("Your explanation:", key=f"feyn_{lesson_id}", height=180, placeholder="Explain simply. Use examples. If you can't, you don't know it yet.")
-        c1,c2 = st.columns(2)
-        with c1:
-            if st.button("✅ Save Feynman", use_container_width=True, key=f"feynsave_{lesson_id}"):
-                if feyn.strip():
-                    mark_feynman(lesson_id)
-                    save_notes(lesson_id, f"[Feynman {date.today()}]\n{feyn}\n\n" + lesson_prog.get("notes",""))
-                    st.success("Saved!")
-                else:
-                    st.warning("Write your explanation first.")
-        with c2:
-            if lesson_prog.get("feynman_done"):
-                st.success("✅ Feynman completed")
-
-    with tab4:
         st.markdown("### 📝 My Notes")
-        notes = st.text_area("Notes:", value=lesson_prog.get("notes",""), key=f"notes_{lesson_id}", height=280,
-                              placeholder="Write your own explanations, examples, connections...\nAvoid copying — process and rephrase.")
+        notes = st.text_area(
+            "Notes:",
+            value=lesson_prog.get("notes", ""),
+            key=f"notes_{lesson_id}",
+            height=280,
+            placeholder="Write your own explanations, examples, connections...\nAvoid copying — process and rephrase.",
+        )
         if st.button("💾 Save Notes", use_container_width=True, key=f"savenotes_{lesson_id}"):
             save_notes(lesson_id, notes)
             st.success("Saved!")
 
-    with tab5:
+    with tab3:
         st.markdown("### ✅ Mark Complete")
         if status == "completed":
-            st.success(f"✅ Completed: {lesson_prog.get('completed_date','?')} | Next review: **{lesson_prog.get('next_review','?')}** | Reviews done: {lesson_prog.get('review_count',0)}")
-        st.markdown(f'<div style="background:{_t["complete_bg"]};border:1px solid {_t["complete_bdr"]};border-radius:12px;padding:1.2rem;margin-bottom:1rem;color:{_t["text"]}"><strong>Before completing, confirm:</strong></div>', unsafe_allow_html=True)
-        for item in ["Read/watched the full resource","Answered all active recall questions honestly","Completed the Feynman exercise","Can explain the key concepts without notes"]:
+            st.success(
+                f"✅ Completed: {lesson_prog.get('completed_date','?')} | "
+                f"Next review: **{lesson_prog.get('next_review','?')}** | "
+                f"Reviews done: {lesson_prog.get('review_count', 0)}"
+            )
+        st.markdown(
+            f'<div style="background:{_t["complete_bg"]};border:1px solid {_t["complete_bdr"]};'
+            f'border-radius:12px;padding:1.2rem;margin-bottom:1rem;color:{_t["text"]}">'
+            f'<strong>Before completing, confirm:</strong></div>',
+            unsafe_allow_html=True,
+        )
+        for item in [
+            "Read/watched the full resource",
+            "Completed at least one AI active recall attempt",
+            "Can explain the key concepts without notes",
+        ]:
             st.checkbox(item, key=f"cc_{lesson_id}_{item[:12]}")
-        c1,c2,c3 = st.columns(3)
-        with c1: score = st.slider("Self-score:", 0, 100, 75, key=f"sc_{lesson_id}")
-        with c2: t = st.number_input("Time (min):", 1, 120, value=lesson["estimated_minutes"], key=f"tm_{lesson_id}")
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            score = st.slider("Self-score:", 0, 100, 75, key=f"sc_{lesson_id}")
+        with c2:
+            t = st.number_input("Time (min):", 1, 120, value=lesson["estimated_minutes"], key=f"tm_{lesson_id}")
         with c3:
-            st.markdown("<br>",unsafe_allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
             btn = "✅ Mark Complete" if status != "completed" else "🔄 Log Review"
             if st.button(btn, use_container_width=True, key=f"mc_{lesson_id}"):
                 result = mark_complete(lesson_id, score=score, time_spent=t)
@@ -1287,11 +1269,10 @@ def render_subject_page(subject_name, curriculum, prefix, color, icon):
                             )
                             st.text_area("Your answer:", key=f"rev_ans_{lid}_{i}", height=70)
                     else:
-                        # Fallback to original questions
-                        st.markdown(f"**Feynman Prompt:** *{lesson['feynman_prompt']}*")
-                        for q in lesson.get("active_recall_questions",[])[:2]:
-                            st.markdown(f"- {q}")
-                        st.text_area("Recall notes:", key=f"rn_{lid}", height=60)
+                        st.info(
+                            "Click 'Generate smart review questions' above to get AI questions "
+                            "targeted at your known weak areas for this lesson."
+                        )
 
                     r1,r2,r3 = st.columns(3)
                     with r1:
