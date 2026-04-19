@@ -465,6 +465,7 @@ def render_sidebar():
             "🇰🇷  Korean": "korean",
             "⚛️  Physics": "physics",
             "✈️  RAF Application": "raf",
+            "🤖  AI Tools": "ai_tools",
         }
         if "current_page" not in st.session_state:
             st.session_state.current_page = "overview"
@@ -1052,6 +1053,10 @@ def render_lesson_viewer(lesson, unit_color, unit_level):
                 st.info("Lesson unmarked — back to not started.")
                 st.rerun()
 
+    # ── AI Tools ──────────────────────────────────────────────────────────────
+    from ai_lesson_tab import render_ai_lesson_tab
+    render_ai_lesson_tab(lesson, lesson_prog)
+
 # ─── Subject Reviews Summary ─────────────────────────────────────────────────
 
 def _render_subject_reviews(progress, curriculum, prefix, color, icon):
@@ -1246,10 +1251,48 @@ def render_subject_page(subject_name, curriculum, prefix, color, icon):
                             break
                 if not lesson: continue
                 with st.expander(f"🔄 {lid} — {lesson['title']}"):
-                    st.markdown(f"**Feynman Prompt:** *{lesson['feynman_prompt']}*")
-                    for q in lesson.get("active_recall_questions",[])[:2]:
-                        st.markdown(f"- {q}")
-                    st.text_area("Recall notes:", key=f"rn_{lid}", height=60)
+                    # Pre-review briefing from weakness log
+                    from store_weakness import get_lesson_weakness_summary, load_weakness_log
+                    summary = get_lesson_weakness_summary(lid)
+                    if summary["attempts"] > 0:
+                        st.markdown(
+                            f'<div style="background:#f0f7ff;border-left:3px solid #3498db;'
+                            f'border-radius:0 8px 8px 0;padding:.7rem 1rem;margin-bottom:.8rem;font-size:.86rem">'
+                            f'<strong>Your history:</strong> {summary["attempts"]} attempt(s) · '
+                            f'Avg score {summary["avg_score"]}/5'
+                            + (f' · Top gap: <em>{summary["top_gaps"][0]}</em>' if summary["top_gaps"] else '')
+                            + f'</div>',
+                            unsafe_allow_html=True,
+                        )
+
+                    # AI-generated questions
+                    from ai_helper import generate_review_questions
+                    weakness_log = load_weakness_log(lesson_id=lid)
+                    if st.button(f"Generate smart review questions", key=f"genrev_{lid}"):
+                        with st.spinner("Generating targeted questions..."):
+                            result = generate_review_questions(lesson, weakness_log, n=3)
+                        st.session_state[f"rev_qs_{lid}"] = result.get("questions", [])
+
+                    qs = st.session_state.get(f"rev_qs_{lid}", [])
+                    if qs:
+                        for i, q in enumerate(qs):
+                            tw = q.get("targets_weakness", False)
+                            badge = (' <span style="font-size:.72rem;background:#ffe0e0;border-radius:3px;'
+                                     'padding:1px 5px">targets weak area</span>') if tw else ""
+                            st.markdown(
+                                f'<div style="background:#f8f9ff;border-left:2px solid #534AB7;'
+                                f'padding:.6rem .9rem;margin:.3rem 0;font-size:.88rem">'
+                                f'Q{i+1}: {q["question"]}{badge}</div>',
+                                unsafe_allow_html=True,
+                            )
+                            st.text_area("Your answer:", key=f"rev_ans_{lid}_{i}", height=70)
+                    else:
+                        # Fallback to original questions
+                        st.markdown(f"**Feynman Prompt:** *{lesson['feynman_prompt']}*")
+                        for q in lesson.get("active_recall_questions",[])[:2]:
+                            st.markdown(f"- {q}")
+                        st.text_area("Recall notes:", key=f"rn_{lid}", height=60)
+
                     r1,r2,r3 = st.columns(3)
                     with r1:
                         if st.button("😰 Hard", key=f"h_{lid}"):
@@ -1301,6 +1344,9 @@ def main():
          elif page == "korean": page_korean()
          elif page == "physics": page_physics()
          elif page == "raf": page_raf()
+         elif page == "ai_tools":
+             from ai_tools import page_ai_tools
+             page_ai_tools()
 
 
 
