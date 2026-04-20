@@ -1,8 +1,25 @@
 """
-How to Study Korean - Full Curriculum
-Units 0-8 with lesson metadata, learning goals, techniques, and time estimates.
+How to Study Korean — Full Curriculum
+Units 0–8 with lesson metadata, learning goals, techniques, and time estimates.
 Lessons exceeding ~25 min are split into Part A / Part B.
+
+TOPIK integration
+─────────────────
+Each lesson has a `topik_vocab_count` field — the approximate number of TOPIK I
+vocabulary words introduced or reinforced in that lesson. Track cumulative vocab
+learned against TOPIK_I_TARGET to get a second measurable progress axis alongside
+the HTSK lesson number.
+
+TOPIK_I_TARGET  : recommended word count to sit TOPIK I comfortably (Level 1–2)
+TOPIK_I_FULL    : full official TOPIK I vocabulary list size
+
+Lessons also carry `knowledge_bank` and `expected_answers` to enable AI marking,
+exactly as in physics_curriculum.py.
 """
+
+# ─── TOPIK constants ─────────────────────────────────────────────────────────
+TOPIK_I_TARGET = 1200   # recommended comfortable threshold for TOPIK I exam
+TOPIK_I_FULL   = 1671   # full official TOPIK I word list (Tammy Korean / NIIED)
 
 CURRICULUM = {
     "Unit 0": {
@@ -36,6 +53,40 @@ CURRICULUM = {
                     {"name": "HTSK Unit 0 Lesson 1", "url": "https://www.howtostudykorean.com/unit0/unit0lesson1/"},
                     {"name": "Naver Dictionary", "url": "https://dict.naver.com/"},
                 ],
+                "topik_vocab_count": 10,
+                "knowledge_bank": {
+                    "summary": (
+                        "Korean has 10 basic vowels. Each is written by combining a vertical or "
+                        "horizontal line with short strokes. Vowels cannot stand alone — they always "
+                        "appear with the silent placeholder consonant ㅇ in front. "
+                        "ㅏ = 'ah' (father), ㅓ = 'uh' (but), ㅗ = 'oh' (go), ㅜ = 'oo' (moon), "
+                        "ㅡ = 'eu' (no English equivalent — flat lips), ㅣ = 'ee' (see), "
+                        "ㅐ = 'eh' (bed), ㅔ = 'eh' (very similar to ㅐ), ㅚ = 'weh', ㅢ = 'ui'."
+                    ),
+                    "facts": [
+                        "The 10 basic Korean vowels: ㅏ ㅓ ㅗ ㅜ ㅡ ㅣ ㅐ ㅔ ㅚ ㅢ.",
+                        "ㅇ is a silent placeholder used before vowels in syllable blocks.",
+                        "ㅏ sounds like 'ah' as in 'father'.",
+                        "ㅓ sounds like 'uh' as in 'but'.",
+                        "ㅗ sounds like 'oh' as in 'go'.",
+                        "ㅜ sounds like 'oo' as in 'moon'.",
+                        "ㅡ has no direct English equivalent — produced with a flat, unrounded mouth.",
+                        "ㅣ sounds like 'ee' as in 'see'.",
+                        "ㅐ and ㅔ sound very similar — both close to 'eh' in 'bed'.",
+                    ],
+                },
+                "expected_answers": {
+                    "List all 10 basic Korean vowels.": "ㅏ ㅓ ㅗ ㅜ ㅡ ㅣ ㅐ ㅔ ㅚ ㅢ",
+                    "What does the silent consonant ㅇ do?": (
+                        "It acts as a placeholder consonant when a syllable starts with a vowel. "
+                        "It has no sound in this position."
+                    ),
+                    "How does ㅏ differ from ㅓ?": (
+                        "ㅏ is a bright 'ah' sound (like 'father'). "
+                        "ㅓ is a darker 'uh' sound (like 'but'). "
+                        "ㅏ has the short stroke to the right; ㅓ has it to the left."
+                    ),
+                },
             },
             {
                 "id": "U0L2",
@@ -61,6 +112,34 @@ CURRICULUM = {
                     {"name": "HTSK Unit 0 Lesson 2", "url": "https://www.howtostudykorean.com/unit0/0-lesson-2/"},
                     {"name": "Hangul Practice Sheets", "url": "https://www.google.com/search?q=hangul+practice+sheets+pdf+free"},
                 ],
+                "topik_vocab_count": 14,
+                "knowledge_bank": {
+                    "summary": (
+                        "Korean has 14 basic consonants. Each has a plain, aspirated, or tense version. "
+                        "Plain consonants: ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ ㅅ ㅈ ㅎ. "
+                        "Aspirated (extra breath): ㅋ ㅌ ㅍ ㅊ. "
+                        "Consonants combine with vowels to form syllable blocks. "
+                        "ㅇ is silent at the start of a syllable but sounds like 'ng' when it appears as a final consonant."
+                    ),
+                    "facts": [
+                        "14 basic consonants: ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ ㅅ ㅇ ㅈ ㅊ ㅋ ㅌ ㅍ ㅎ.",
+                        "Aspirated consonants: ㅋ (k+h), ㅌ (t+h), ㅍ (p+h), ㅊ (ch+h).",
+                        "ㅇ is silent at the start; sounds like 'ng' as a final consonant.",
+                        "Syllable blocks are always C+V or C+V+C.",
+                        "ㄹ sounds like a flap between 'r' and 'l'.",
+                    ],
+                },
+                "expected_answers": {
+                    "List all 14 basic Korean consonants.": "ㄱ ㄴ ㄷ ㄹ ㅁ ㅂ ㅅ ㅇ ㅈ ㅊ ㅋ ㅌ ㅍ ㅎ",
+                    "What makes an aspirated consonant different?": (
+                        "Aspirated consonants (ㅋ ㅌ ㅍ ㅊ) are produced with a noticeable puff of air, "
+                        "like placing a hand in front of your mouth and feeling breath. Their plain "
+                        "counterparts (ㄱ ㄷ ㅂ ㅈ) have no such burst."
+                    ),
+                    "How is the syllable block '나' formed?": (
+                        "ㄴ (consonant) + ㅏ (vowel) = 나. The consonant goes on the left, the vowel on the right."
+                    ),
+                },
             },
             {
                 "id": "U0L3",
@@ -86,6 +165,35 @@ CURRICULUM = {
                     {"name": "HTSK Unit 0 Lesson 3", "url": "https://www.howtostudykorean.com/unit0/unit-0-lesson-3/"},
                     {"name": "Pronunciation Tips", "url": "https://www.howtostudykorean.com/unit0/197-2/"},
                 ],
+                "topik_vocab_count": 20,
+                "knowledge_bank": {
+                    "summary": (
+                        "Every Korean syllable is written as a block, not linearly. "
+                        "Three block structures exist: (1) C+V — consonant left/top, vowel right/below; "
+                        "(2) C+V+C — same but with a final consonant (받침) underneath; "
+                        "(3) V only — vowel with silent ㅇ placeholder. "
+                        "받침 is the term for the final consonant in a block."
+                    ),
+                    "facts": [
+                        "Three syllable block structures: C+V, C+V+C, and vowel-only (ㅇ+V).",
+                        "받침 = final consonant at the bottom of a syllable block.",
+                        "한 = ㅎ + ㅏ + ㄴ (C+V+C structure).",
+                        "아 = ㅇ + ㅏ (silent ㅇ + vowel).",
+                        "Syllable blocks are always square in appearance — Korean is never written linearly.",
+                    ],
+                },
+                "expected_answers": {
+                    "What are the 3 syllable block structures in Korean?": (
+                        "1. C+V (consonant + vowel, e.g. 나). "
+                        "2. C+V+C (consonant + vowel + final consonant, e.g. 한). "
+                        "3. V only — written as silent ㅇ + vowel (e.g. 아)."
+                    ),
+                    "How is '학' broken down?": (
+                        "ㅎ (initial consonant) + ㅏ (vowel) + ㄱ (받침 / final consonant). "
+                        "Structure: C+V+C."
+                    ),
+                    "What is 받침?": "받침 is the final consonant written at the bottom of a Korean syllable block.",
+                },
             },
             {
                 "id": "U0L4",
@@ -111,6 +219,36 @@ CURRICULUM = {
                     {"name": "HTSK Pronunciation Tips", "url": "https://www.howtostudykorean.com/unit0/197-2/"},
                     {"name": "Quick Reference Chart", "url": "https://www.howtostudykorean.com/unit0/reading-quick-reference/"},
                 ],
+                "topik_vocab_count": 10,
+                "knowledge_bank": {
+                    "summary": (
+                        "5 tense (doubled) consonants: ㄲ ㄸ ㅃ ㅆ ㅉ — produced with a tense throat, "
+                        "no aspiration. Key pronunciation rules: "
+                        "(1) Linking — a 받침 before a vowel moves to the next syllable (e.g. 한국어 → 한구거). "
+                        "(2) Nasalisation — ㄱ/ㄷ/ㅂ before ㄴ/ㅁ become ㅇ/ㄴ/ㅁ (e.g. 국민 → 궁민). "
+                        "(3) Aspiration — ㄱ/ㄷ/ㅂ/ㅈ + ㅎ merge into ㅋ/ㅌ/ㅍ/ㅊ. "
+                        "(4) ㄹ assimilation — ㄹ next to ㄴ makes both ㄹ."
+                    ),
+                    "facts": [
+                        "5 tense consonants: ㄲ ㄸ ㅃ ㅆ ㅉ.",
+                        "Linking rule: 받침 + vowel → 받침 sound moves to next syllable.",
+                        "Nasalisation: ㄱ→ㅇ, ㄷ→ㄴ, ㅂ→ㅁ before nasal consonants ㄴ/ㅁ.",
+                        "국민 is pronounced 궁민 (nasalisation of ㄱ before ㅁ).",
+                        "읽다 — the ㄺ cluster: the ㄱ is silent; pronounced 일다.",
+                    ],
+                },
+                "expected_answers": {
+                    "List the 5 tense consonants.": "ㄲ ㄸ ㅃ ㅆ ㅉ",
+                    "Why is 국민 pronounced 궁민?": (
+                        "Nasalisation rule: ㄱ before the nasal consonant ㅁ becomes ㅇ. "
+                        "So 국 → 궁 in speech."
+                    ),
+                    "What is the linking rule in Korean pronunciation?": (
+                        "When a syllable ends in a 받침 and the next syllable starts with the silent ㅇ, "
+                        "the 받침 sound moves forward and is pronounced as the initial consonant of the next syllable. "
+                        "Example: 한국어 → pronounced 한구거."
+                    ),
+                },
             },
         ],
     },
@@ -146,6 +284,35 @@ CURRICULUM = {
                     {"name": "HTSK Lessons 1–8", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-1-8/"},
                     {"name": "Anki HTSK Deck", "url": "https://www.howtostudykorean.com/anki/"},
                 ],
+                "topik_vocab_count": 40,
+                "knowledge_bank": {
+                    "summary": (
+                        "Korean sentence order is Subject–Object–Verb (SOV), opposite to English. "
+                        "이다 means 'to be' and attaches directly to the noun. "
+                        "Formal present: noun + 입니다. Informal polite: noun + 이에요 (after consonant) or 예요 (after vowel). "
+                        "Example: 저는 학생이에요 = I am a student."
+                    ),
+                    "facts": [
+                        "Korean sentence order: Subject → Object → Verb (SOV).",
+                        "이다 = to be. Attaches to the preceding noun.",
+                        "Formal present tense of 이다: 입니다.",
+                        "Informal polite present: 이에요 (after consonant), 예요 (after vowel).",
+                        "저 = I/me (formal/humble). 나 = I/me (casual).",
+                        "학생 = student. 선생님 = teacher. 사람 = person.",
+                        "한국 = Korea. 영국 = England.",
+                    ],
+                    "grammar_rules": [
+                        "SOV order: 저는 밥을 먹어요 (I rice eat = I eat rice).",
+                        "이다 after consonant: 학생이에요.",
+                        "이다 after vowel: 의사예요.",
+                    ],
+                },
+                "expected_answers": {
+                    "Translate: 'I am a student.'": "저는 학생이에요. (informal polite) / 저는 학생입니다. (formal)",
+                    "What is Korean sentence order?": "Subject – Object – Verb (SOV).",
+                    "What is the informal polite ending for 이다 after a consonant?": "이에요",
+                    "What is the informal polite ending for 이다 after a vowel?": "예요",
+                },
             },
             {
                 "id": "U1L2",
@@ -170,6 +337,37 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 1–8", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-1-8/"},
                 ],
+                "topik_vocab_count": 30,
+                "knowledge_bank": {
+                    "summary": (
+                        "이/가 = subject particle (marks the grammatical subject of the sentence). "
+                        "은/는 = topic particle (marks what the sentence is *about*, often implying contrast or new topic). "
+                        "이 and 은 are used after consonants; 가 and 는 after vowels. "
+                        "은/는 often implies 'as for X' or subtle contrast. 이/가 is more neutral."
+                    ),
+                    "facts": [
+                        "이/가 = subject particle. 이 after consonant, 가 after vowel.",
+                        "은/는 = topic particle. 은 after consonant, 는 after vowel.",
+                        "은/는 can imply contrast: 저는 한국 사람이에요 = As for me, I am Korean.",
+                        "이/가 highlights new information; 은/는 marks established or contrasted topics.",
+                        "저 ends in a vowel → 저는. 학생 ends in ㅇ (consonant) → 학생이.",
+                    ],
+                    "grammar_rules": [
+                        "After consonant: 이 (subject), 은 (topic). E.g. 학생이, 학생은.",
+                        "After vowel: 가 (subject), 는 (topic). E.g. 저가, 저는.",
+                    ],
+                },
+                "expected_answers": {
+                    "When do you use 이 vs 가?": (
+                        "이 attaches to nouns ending in a consonant. 가 attaches to nouns ending in a vowel. "
+                        "Both mark the grammatical subject."
+                    ),
+                    "What is the conceptual difference between 이/가 and 은/는?": (
+                        "이/가 marks the subject of the action — neutral, introduces new info. "
+                        "은/는 marks the topic of the sentence — implies contrast or 'as for X'."
+                    ),
+                    "Add the correct particle: 나___ 학생이에요.": "나는 학생이에요. (나 ends in vowel → 는)",
+                },
             },
             {
                 "id": "U1L3",
@@ -194,6 +392,30 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 1–8", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-1-8/"},
                 ],
+                "topik_vocab_count": 35,
+                "knowledge_bank": {
+                    "summary": (
+                        "을/를 = object particle. Marks the direct object of a verb. "
+                        "을 after consonant, 를 after vowel. "
+                        "안 = negation prefix. Placed directly before the verb to negate it. "
+                        "Structure: Subject + Object + 안 + Verb."
+                    ),
+                    "facts": [
+                        "을/를 = object particle. 을 after consonant, 를 after vowel.",
+                        "안 negates a verb: 먹어요 (eat) → 안 먹어요 (don't eat).",
+                        "먹다 = to eat. 마시다 = to drink. 보다 = to see/watch. 읽다 = to read.",
+                        "밥 = rice/meal. 물 = water. 책 = book.",
+                    ],
+                    "grammar_rules": [
+                        "Object particle: 밥을 먹어요 (eat rice). 물을 마셔요 (drink water).",
+                        "Negation: 안 + verb stem + conjugation. E.g. 안 먹어요.",
+                    ],
+                },
+                "expected_answers": {
+                    "Add the correct particle: 밥___ 먹어요.": "밥을 먹어요. (밥 ends in consonant → 을)",
+                    "Negate: '물을 마셔요' using 안.": "물을 안 마셔요.",
+                    "Translate: 'I don't read books.'": "저는 책을 안 읽어요.",
+                },
             },
             {
                 "id": "U1L4",
@@ -219,6 +441,32 @@ CURRICULUM = {
                     {"name": "HTSK Lessons 1–8", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-1-8/"},
                     {"name": "Korean Conjugation Reference", "url": "https://www.howtostudykorean.com/conjugation/purchase/"},
                 ],
+                "topik_vocab_count": 40,
+                "knowledge_bank": {
+                    "summary": (
+                        "Informal polite present tense is formed by taking the verb stem and adding 아요 or 어요. "
+                        "Vowel harmony rule: if the last vowel of the stem is ㅏ or ㅗ → add 아요. "
+                        "All other stems → add 어요. "
+                        "하다 verbs are irregular: 하다 → 해요 (not 하아요)."
+                    ),
+                    "facts": [
+                        "Stem vowel ㅏ or ㅗ → add 아요. E.g. 가다 → 가요, 오다 → 와요.",
+                        "All other stem vowels → add 어요. E.g. 먹다 → 먹어요.",
+                        "하다 → 해요 (irregular — most common verb pattern).",
+                        "공부하다 → 공부해요. 일하다 → 일해요. 좋아하다 → 좋아해요.",
+                        "가다 = to go. 오다 = to come. 자다 = to sleep. 알다 = to know.",
+                    ],
+                    "grammar_rules": [
+                        "Stem ends in ㅏ/ㅗ → 아요: 가 + 아요 = 가요 (ㅏ+ㅏ contract).",
+                        "Other stems → 어요: 먹 + 어요 = 먹어요.",
+                        "하다 → 해요 (always irregular).",
+                    ],
+                },
+                "expected_answers": {
+                    "Conjugate: 가다 → ?": "가요 (stem ㅏ → 아요, contracts to 가요)",
+                    "Conjugate: 먹다 → ?": "먹어요 (stem ㅓ → 어요)",
+                    "Conjugate: 공부하다 → ?": "공부해요 (하다 → 해요)",
+                },
             },
             {
                 "id": "U1L5",
@@ -243,6 +491,32 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 1–8", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-1-8/"},
                 ],
+                "topik_vocab_count": 35,
+                "knowledge_bank": {
+                    "summary": (
+                        "Past tense is formed by adding 았어요 (after ㅏ/ㅗ stems) or 었어요 (all other stems). "
+                        "하다 → 했어요. "
+                        "있다 = there is / to have. 없다 = there is not / to not have. "
+                        "These are the most important existence verbs in Korean."
+                    ),
+                    "facts": [
+                        "Past tense: stem ㅏ/ㅗ + 았어요. E.g. 가다 → 갔어요.",
+                        "Past tense: other stems + 었어요. E.g. 먹다 → 먹었어요.",
+                        "하다 → 했어요 (irregular past).",
+                        "있다 = to exist / to have. 없다 = to not exist / to not have.",
+                        "있어요 (present). 있었어요 (past). 없어요 (present). 없었어요 (past).",
+                    ],
+                    "grammar_rules": [
+                        "Past: ㅏ/ㅗ stem + 았어요: 가 + 았어요 = 갔어요 (contraction).",
+                        "Past: other stem + 었어요: 먹 + 었어요 = 먹었어요.",
+                        "하다 past: 했어요.",
+                    ],
+                },
+                "expected_answers": {
+                    "Convert to past tense: 가요 → ?": "갔어요",
+                    "Convert to past tense: 먹어요 → ?": "먹었어요",
+                    "Translate: 'There is no water.'": "물이 없어요.",
+                },
             },
             {
                 "id": "U1L6",
@@ -267,6 +541,32 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 1–8", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-1-8/"},
                 ],
+                "topik_vocab_count": 30,
+                "knowledge_bank": {
+                    "summary": (
+                        "에 and 에서 are both location particles but serve different purposes. "
+                        "에 marks: (1) the location where something exists (있다/없다), "
+                        "(2) the destination of movement verbs (가다, 오다). "
+                        "에서 marks the location where an action actively takes place."
+                    ),
+                    "facts": [
+                        "에 = location of existence or direction of movement.",
+                        "에서 = location where an action takes place.",
+                        "학교에 있어요 = I am at school (existence → 에).",
+                        "학교에서 공부해요 = I study at school (action → 에서).",
+                        "학교에 가요 = I go to school (movement/direction → 에).",
+                    ],
+                    "grammar_rules": [
+                        "있다/없다 + 에: 집에 있어요 (I am at home).",
+                        "Movement verbs + 에: 학교에 가요 (I go to school).",
+                        "Action verbs + 에서: 카페에서 일해요 (I work at the café).",
+                    ],
+                },
+                "expected_answers": {
+                    "Translate: 'I study at the library.'": "도서관에서 공부해요. (action → 에서)",
+                    "Translate: 'I go to school.'": "학교에 가요. (movement → 에)",
+                    "Translate: 'There is a cat in the house.'": "집에 고양이가 있어요. (existence → 에)",
+                },
             },
             {
                 "id": "U1L7",
@@ -291,6 +591,32 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 1–8", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-1-8/"},
                 ],
+                "topik_vocab_count": 25,
+                "knowledge_bank": {
+                    "summary": (
+                        "Korean has three ways to say 'and' between nouns, varying by formality. "
+                        "와/과 = formal written. 하고 = neutral spoken. (이)랑 = informal/casual. "
+                        "All three also mean 'with' in the sense of doing something together with someone."
+                    ),
+                    "facts": [
+                        "와/과: 와 after vowel, 과 after consonant. Formal.",
+                        "하고: neutral, common in speech. Same form regardless of final sound.",
+                        "(이)랑: 랑 after vowel, 이랑 after consonant. Informal/casual.",
+                        "빵하고 우유 = bread and milk (neutral). 빵이랑 우유 = bread and milk (casual).",
+                    ],
+                    "grammar_rules": [
+                        "Formal: 빵과 우유 (빵 ends in consonant → 과).",
+                        "Neutral: 빵하고 우유.",
+                        "Casual: 빵이랑 우유 (빵 ends in consonant → 이랑).",
+                    ],
+                },
+                "expected_answers": {
+                    "Connect '빵' and '우유' using all three connectors.": (
+                        "Formal: 빵과 우유. Neutral: 빵하고 우유. Casual: 빵이랑 우유."
+                    ),
+                    "Which connector is most formal?": "와/과",
+                    "When do you use 이랑 vs 랑?": "이랑 after a consonant-ending noun; 랑 after a vowel-ending noun.",
+                },
             },
             {
                 "id": "U1L8",
@@ -315,6 +641,32 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 1–8", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-1-8/"},
                 ],
+                "topik_vocab_count": 40,
+                "knowledge_bank": {
+                    "summary": (
+                        "의 = possessive particle ('s). Often dropped in casual speech. "
+                        "Korean has two number systems: Native Korean (하나, 둘, 셋...) and Sino-Korean (일, 이, 삼...). "
+                        "Native Korean: ages, hours, counting general items with counters. "
+                        "Sino-Korean: dates, minutes, money, phone numbers, floors."
+                    ),
+                    "facts": [
+                        "의 = possessive. 나의 책 = my book (often spoken as 내 책).",
+                        "Native Korean 1–10: 하나 둘 셋 넷 다섯 여섯 일곱 여덟 아홉 열.",
+                        "Sino-Korean 1–10: 일 이 삼 사 오 육 칠 팔 구 십.",
+                        "Ages use Native Korean: 스물한 살 (21 years old).",
+                        "Months use Sino-Korean: 삼월 = March (3rd month).",
+                        "Hours use Native Korean: 세 시 = 3 o'clock.",
+                        "Minutes use Sino-Korean: 삼십 분 = 30 minutes.",
+                    ],
+                },
+                "expected_answers": {
+                    "Count 1–5 in Sino-Korean.": "일, 이, 삼, 사, 오",
+                    "Count 1–5 in Native Korean.": "하나, 둘, 셋, 넷, 다섯",
+                    "Which number system is used for ages? Which for floors?": (
+                        "Ages: Native Korean (스물 살 = 20 years old). "
+                        "Floors: Sino-Korean (삼 층 = 3rd floor)."
+                    ),
+                },
             },
             # Lessons 9–16
             {
@@ -340,6 +692,29 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 9–16", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-9-16/"},
                 ],
+                "topik_vocab_count": 35,
+                "knowledge_bank": {
+                    "summary": (
+                        "Counters follow the number and specify what is being counted. "
+                        "개 = general objects. 명 = people (neutral). 마리 = animals. 권 = books. 잔 = cups. "
+                        "Telling the time: hours use Native Korean numbers + 시; "
+                        "minutes use Sino-Korean numbers + 분."
+                    ),
+                    "facts": [
+                        "개 = counter for general objects. 사과 세 개 = 3 apples.",
+                        "명 = counter for people. 사람 두 명 = 2 people.",
+                        "마리 = counter for animals. 고양이 한 마리 = 1 cat.",
+                        "시 = o'clock (Native Korean hours). 세 시 = 3 o'clock.",
+                        "분 = minutes (Sino-Korean). 삼십 분 = 30 minutes.",
+                        "지금 몇 시예요? = What time is it now?",
+                        "오전 = AM. 오후 = PM.",
+                    ],
+                },
+                "expected_answers": {
+                    "How do you say '5 animals'?": "동물 다섯 마리 (Native Korean 5 + animal counter 마리)",
+                    "How do you say '2:30'?": "두 시 삼십 분 (Native Korean 2 + 시, Sino-Korean 30 + 분)",
+                    "Ask 'What time is it?' in Korean.": "지금 몇 시예요?",
+                },
             },
             {
                 "id": "U1L10",
@@ -364,6 +739,25 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 9–16", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-9-16/"},
                 ],
+                "topik_vocab_count": 30,
+                "knowledge_bank": {
+                    "summary": (
+                        "Days of the week follow a pattern based on the five elements + sun + moon. "
+                        "Months are Sino-Korean numbers + 월. Dates are Sino-Korean numbers + 일. "
+                        "Full date format: year 년 + month 월 + date 일 + day 요일."
+                    ),
+                    "facts": [
+                        "월요일 Mon, 화요일 Tue, 수요일 Wed, 목요일 Thu, 금요일 Fri, 토요일 Sat, 일요일 Sun.",
+                        "Months: 일월(Jan) 이월(Feb) 삼월(Mar) 사월(Apr) 오월(May) 유월(Jun) 칠월(Jul) 팔월(Aug) 구월(Sep) 시월(Oct) 십일월(Nov) 십이월(Dec).",
+                        "Note: June = 유월 (not 육월), October = 시월 (not 십월) — irregular.",
+                        "Date format: 이천이십육년 사월 이십일일 월요일.",
+                    ],
+                },
+                "expected_answers": {
+                    "What is 'Wednesday' in Korean?": "수요일",
+                    "How do you say 'March 15th'?": "삼월 십오일",
+                    "Translate: 'Today is Tuesday, April 14th.'": "오늘은 사월 십사일 화요일이에요.",
+                },
             },
             {
                 "id": "U1L11",
@@ -388,6 +782,31 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 9–16", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-9-16/"},
                 ],
+                "topik_vocab_count": 20,
+                "knowledge_bank": {
+                    "summary": (
+                        "~고 싶다 attaches to a verb stem to express wanting to do something. "
+                        "For first/second person: verb stem + 고 싶어요. "
+                        "For third person (he/she wants): verb stem + 고 싶어해요 (using 싶어하다). "
+                        "Past: 고 싶었어요."
+                    ),
+                    "facts": [
+                        "고 싶다 = want to do. Attaches to verb stem.",
+                        "먹다 → 먹고 싶어요 (I want to eat).",
+                        "가다 → 가고 싶어요 (I want to go).",
+                        "Third person: 가고 싶어해요 (He/she wants to go).",
+                        "Past: 먹고 싶었어요 (I wanted to eat).",
+                    ],
+                    "grammar_rules": [
+                        "1st/2nd person: verb stem + 고 싶어요.",
+                        "3rd person: verb stem + 고 싶어해요.",
+                    ],
+                },
+                "expected_answers": {
+                    "Translate: 'I want to eat Korean food.'": "한국 음식을 먹고 싶어요.",
+                    "Translate: 'She wants to go to Korea.'": "그녀는 한국에 가고 싶어해요.",
+                    "What is the past tense of 고 싶다?": "고 싶었어요 (e.g. 먹고 싶었어요 = I wanted to eat)",
+                },
             },
             {
                 "id": "U1L12",
@@ -412,6 +831,31 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 9–16", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-9-16/"},
                 ],
+                "topik_vocab_count": 20,
+                "knowledge_bank": {
+                    "summary": (
+                        "~ㄹ/을 수 있다 = can (ability). ~ㄹ/을 수 없다 = cannot. "
+                        "Rule: if verb stem ends in a vowel → ㄹ 수 있다. "
+                        "If verb stem ends in a consonant → 을 수 있다."
+                    ),
+                    "facts": [
+                        "가다 (stem: 가, vowel) → 갈 수 있어요 (can go).",
+                        "먹다 (stem: 먹, consonant) → 먹을 수 있어요 (can eat).",
+                        "Can't: 갈 수 없어요 / 먹을 수 없어요.",
+                        "말하다 = to speak. 운전하다 = to drive. 수영하다 = to swim.",
+                    ],
+                    "grammar_rules": [
+                        "Vowel stem + ㄹ 수 있다: 가 + ㄹ 수 있어요 = 갈 수 있어요.",
+                        "Consonant stem + 을 수 있다: 먹 + 을 수 있어요 = 먹을 수 있어요.",
+                    ],
+                },
+                "expected_answers": {
+                    "Translate: 'I can speak Korean.'": "한국어를 말할 수 있어요.",
+                    "Translate: 'He cannot drive.'": "그는 운전할 수 없어요.",
+                    "What changes between 먹다 and 가다 with this pattern?": (
+                        "가다 has a vowel stem → ㄹ 수 있다. 먹다 has a consonant stem → 을 수 있다."
+                    ),
+                },
             },
             {
                 "id": "U1L13",
@@ -436,6 +880,33 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 9–16", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-9-16/"},
                 ],
+                "topik_vocab_count": 20,
+                "knowledge_bank": {
+                    "summary": (
+                        "~아/어야 하다 expresses obligation ('must/have to'). "
+                        "~아/어야 되다 is interchangeable and equally common. "
+                        "Formation follows the same vowel harmony as 아요/어요 conjugation."
+                    ),
+                    "facts": [
+                        "가야 해요 = I have to go (가 + 아야 하다).",
+                        "먹어야 해요 = I have to eat (먹 + 어야 하다).",
+                        "해야 해요 = I have to do it (하다 irregular).",
+                        "되다 form: 가야 돼요 — equally natural.",
+                    ],
+                    "grammar_rules": [
+                        "ㅏ/ㅗ stem + 아야 하다: 가 → 가야 해요.",
+                        "Other stem + 어야 하다: 먹 → 먹어야 해요.",
+                        "하다 → 해야 해요.",
+                    ],
+                },
+                "expected_answers": {
+                    "Translate: 'I have to study.'": "공부해야 해요. (or 공부해야 돼요)",
+                    "Translate: 'You must sleep early.'": "일찍 자야 해요.",
+                    "Is there a difference between 해야 하다 and 해야 되다?": (
+                        "Functionally the same in most contexts. 하다 sounds slightly more formal/assertive; "
+                        "되다 sounds slightly softer/more colloquial."
+                    ),
+                },
             },
             {
                 "id": "U1L14",
@@ -460,6 +931,28 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 9–16", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-9-16/"},
                 ],
+                "topik_vocab_count": 15,
+                "knowledge_bank": {
+                    "summary": (
+                        "~지 않다 is the suffix-based negation, more formal than 안 + verb. "
+                        "Formation: verb/adjective stem + 지 않아요. "
+                        "Both forms are correct; 안 is more casual, ~지 않다 more polished."
+                    ),
+                    "facts": [
+                        "먹지 않아요 = I don't eat (formal). 안 먹어요 = I don't eat (casual).",
+                        "가지 않아요 = I don't go. 좋지 않아요 = It's not good.",
+                        "Applies to both action verbs and descriptive verbs (adjectives).",
+                    ],
+                    "grammar_rules": [
+                        "Stem + 지 않아요: 먹 + 지 않아요 = 먹지 않아요.",
+                        "Past: stem + 지 않았어요: 먹지 않았어요.",
+                    ],
+                },
+                "expected_answers": {
+                    "Negate formally: '먹어요' → ?": "먹지 않아요",
+                    "Negate formally: '좋아요' → ?": "좋지 않아요",
+                    "Translate: 'I do not go to school.'": "학교에 가지 않아요.",
+                },
             },
             {
                 "id": "U1L15",
@@ -484,6 +977,24 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 9–16", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-9-16/"},
                 ],
+                "topik_vocab_count": 10,
+                "knowledge_bank": {
+                    "summary": (
+                        "고 싶지 않아요 = polite 'I don't want to' (neutral/soft). "
+                        "기 싫어요 = stronger emotional 'I don't want to / I hate doing'. "
+                        "기 싫다 formation: verb stem + 기 싫다."
+                    ),
+                    "facts": [
+                        "가고 싶지 않아요 = I don't want to go (mild/polite).",
+                        "가기 싫어요 = I don't want to go / I hate going (stronger, emotional).",
+                        "먹기 싫어요 = I don't feel like eating (strong aversion).",
+                    ],
+                },
+                "expected_answers": {
+                    "Translate: 'I don't want to go.'": "가고 싶지 않아요. (or 가기 싫어요 for stronger feeling)",
+                    "Translate: 'I really don't want to eat that.'": "그거 먹기 싫어요.",
+                    "Which is more emotional?": "기 싫다 — it implies stronger reluctance or aversion.",
+                },
             },
             {
                 "id": "U1L16",
@@ -508,6 +1019,30 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 9–16", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-9-16/"},
                 ],
+                "topik_vocab_count": 15,
+                "knowledge_bank": {
+                    "summary": (
+                        "~는 것 turns a verb into a noun phrase (like English '-ing' or 'the act of'). "
+                        "Present/action verbs: stem + 는 것. "
+                        "는 게 is a contracted spoken form of 는 것이."
+                    ),
+                    "facts": [
+                        "공부하는 것 = studying (the act of studying).",
+                        "먹는 것 = eating.",
+                        "공부하는 것이 재미있어요 = Studying is fun (subject).",
+                        "먹는 것을 좋아해요 = I like eating (object).",
+                        "는 게 = contracted 는 것이 — common in speech.",
+                    ],
+                    "grammar_rules": [
+                        "Action verb stem + 는 것: 공부하 + 는 것 = 공부하는 것.",
+                        "Descriptive verb + ㄴ/은 것: 좋 + 은 것 = 좋은 것.",
+                    ],
+                },
+                "expected_answers": {
+                    "Nominalize: '공부하다' → ?": "공부하는 것",
+                    "Translate: 'Studying Korean is fun.'": "한국어를 공부하는 것이 재미있어요.",
+                    "Translate: 'I like eating.'": "먹는 것을 좋아해요.",
+                },
             },
             # Lessons 17–25
             {
@@ -533,6 +1068,30 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 17–25", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-17-25-2/"},
                 ],
+                "topik_vocab_count": 30,
+                "knowledge_bank": {
+                    "summary": (
+                        "Korean adjectives are descriptive verbs — they conjugate like verbs. "
+                        "To modify a noun, add ~ㄴ after vowel stems or ~은 after consonant stems. "
+                        "Example: 크다 (big) → 큰 집 (big house). 좋다 (good) → 좋은 사람 (good person)."
+                    ),
+                    "facts": [
+                        "Korean adjectives conjugate — they are descriptive verbs.",
+                        "To modify a noun: adj stem + ㄴ (after vowel) or 은 (after consonant).",
+                        "크다 → 큰. 작다 → 작은. 좋다 → 좋은. 예쁘다 → 예쁜.",
+                        "맛있다 → 맛있는 음식 (delicious food). 재미있다 → 재미있는 영화.",
+                    ],
+                    "grammar_rules": [
+                        "Vowel stem + ㄴ: 크 + ㄴ = 큰.",
+                        "Consonant stem + 은: 좋 + 은 = 좋은.",
+                        "있다/없다 pattern: 있는, 없는 (uses ~는, not ~은).",
+                    ],
+                },
+                "expected_answers": {
+                    "Modify: '크다' + '집' → ?": "큰 집",
+                    "Modify: '예쁘다' + '여자' → ?": "예쁜 여자",
+                    "Translate: 'a delicious meal'": "맛있는 음식",
+                },
             },
             {
                 "id": "U1L18",
@@ -557,6 +1116,30 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 17–25", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-17-25-2/"},
                 ],
+                "topik_vocab_count": 20,
+                "knowledge_bank": {
+                    "summary": (
+                        "~ㄹ/을 것이다 expresses future tense. Spoken form: ~ㄹ/을 거예요. "
+                        "Rule: vowel stem + ㄹ 거예요. Consonant stem + 을 거예요. "
+                        "하다 → 할 거예요."
+                    ),
+                    "facts": [
+                        "가다 → 갈 거예요 (will go). 먹다 → 먹을 거예요 (will eat).",
+                        "할 거예요 = will do. 볼 거예요 = will watch/see.",
+                        "갈 거예요 (neutral future). 가겠어요 (stronger intention/conjecture).",
+                    ],
+                    "grammar_rules": [
+                        "Vowel stem + ㄹ 거예요: 가 + ㄹ 거예요 = 갈 거예요.",
+                        "Consonant stem + 을 거예요: 먹 + 을 거예요 = 먹을 거예요.",
+                    ],
+                },
+                "expected_answers": {
+                    "Translate: 'I will go to Korea.'": "한국에 갈 거예요.",
+                    "Translate: 'She will eat dinner.'": "그녀는 저녁을 먹을 거예요.",
+                    "What is the vowel-stem vs consonant-stem rule?": (
+                        "Vowel stem → ㄹ 거예요 (e.g. 가 → 갈). Consonant stem → 을 거예요 (e.g. 먹 → 먹을)."
+                    ),
+                },
             },
             {
                 "id": "U1L19",
@@ -581,6 +1164,26 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 17–25", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-17-25-2/"},
                 ],
+                "topik_vocab_count": 20,
+                "knowledge_bank": {
+                    "summary": (
+                        "~고 connects two clauses sequentially ('and then'). "
+                        "Tense only goes on the final verb — not on the 고 clause. "
+                        "Suitable for listing actions in sequence or describing simultaneous states."
+                    ),
+                    "facts": [
+                        "먹고 갔어요 = I ate and (then) went.",
+                        "공부하고 잤어요 = I studied and slept.",
+                        "Tense marker goes on the LAST verb only.",
+                        "일어나고 씻고 먹어요 = I get up, wash, and eat (chained sequence).",
+                    ],
+                    "grammar_rules": ["Verb stem + 고 + next verb: 먹 + 고 + 갔어요 = 먹고 갔어요."],
+                },
+                "expected_answers": {
+                    "Chain: 'I ate and went home.'": "밥을 먹고 집에 갔어요.",
+                    "Chain: 'I studied and slept.'": "공부하고 잤어요.",
+                    "Does tense go on the first clause?": "No — tense only goes on the final verb in the chain.",
+                },
             },
             {
                 "id": "U1L20",
@@ -605,6 +1208,25 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 17–25", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-17-25-2/"},
                 ],
+                "topik_vocab_count": 15,
+                "knowledge_bank": {
+                    "summary": (
+                        "~지만 connects two contrasting clauses ('but/however'). "
+                        "Attaches directly to verb/adjective stem. "
+                        "그렇지만 / 하지만 are standalone words meaning 'however/but' between sentences."
+                    ),
+                    "facts": [
+                        "먹지만 = (I) eat, but... 좋지만 = (it's) good, but...",
+                        "한국어가 어렵지만 재미있어요 = Korean is difficult but interesting.",
+                        "그렇지만 / 하지만 = standalone 'however/but' (between sentences).",
+                    ],
+                    "grammar_rules": ["Verb/adj stem + 지만: 먹 + 지만 = 먹지만."],
+                },
+                "expected_answers": {
+                    "Translate: 'Korean is difficult, but interesting.'": "한국어가 어렵지만 재미있어요.",
+                    "Translate: 'I want to go, but I can't.'": "가고 싶지만 갈 수 없어요.",
+                    "What is the standalone word for 'but/however'?": "그렇지만 or 하지만",
+                },
             },
             {
                 "id": "U1L21",
@@ -629,6 +1251,30 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 17–25", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-17-25-2/"},
                 ],
+                "topik_vocab_count": 25,
+                "knowledge_bank": {
+                    "summary": (
+                        "~아/어서 has two meanings depending on context: "
+                        "(1) Reason: 'because/so' — 피곤해서 잘 거예요 (I'm tired so I'll sleep). "
+                        "(2) Sequential action: 'after doing, then' — 가서 샀어요 (went and then bought). "
+                        "Important: ~아/어서 clause cannot take tense — tense goes on the final verb only."
+                    ),
+                    "facts": [
+                        "피곤해서 잘 거예요 = I'm tired so I'll sleep (reason).",
+                        "가게에 가서 음식을 샀어요 = I went to the store and bought food (sequence).",
+                        "You CANNOT say 갔어서 — no tense on the 아/어서 clause.",
+                    ],
+                    "grammar_rules": [
+                        "ㅏ/ㅗ stem + 아서: 바쁘다 → 바빠서.",
+                        "Other stem + 어서: 피곤하다 → 피곤해서.",
+                        "No tense marker on ~아/어서 clause.",
+                    ],
+                },
+                "expected_answers": {
+                    "Translate: 'I am tired so I will sleep.'": "피곤해서 잘 거예요.",
+                    "Translate: 'I went to the store and bought food.'": "가게에 가서 음식을 샀어요.",
+                    "Can you use tense with ~아/어서?": "No — tense only goes on the final verb, never on the 아/어서 clause.",
+                },
             },
             {
                 "id": "U1L22",
@@ -653,6 +1299,30 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 17–25", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-17-25-2/"},
                 ],
+                "topik_vocab_count": 20,
+                "knowledge_bank": {
+                    "summary": (
+                        "~(으)면 = if/when (conditional). "
+                        "Vowel stem → 면. Consonant stem → 으면. "
+                        "Used for factual conditionals ('when X, Y') and hypotheticals ('if X, Y'). "
+                        "No tense on the ~(으)면 clause."
+                    ),
+                    "facts": [
+                        "가다 → 가면 (if/when you go).",
+                        "먹다 → 먹으면 (if/when you eat).",
+                        "공부하면 합격할 거예요 = If you study, you will pass.",
+                        "비가 오면 집에 있어요 = When it rains, I stay home.",
+                    ],
+                    "grammar_rules": [
+                        "Vowel stem + 면: 가 + 면 = 가면.",
+                        "Consonant stem + 으면: 먹 + 으면 = 먹으면.",
+                    ],
+                },
+                "expected_answers": {
+                    "Translate: 'If you study, you will pass.'": "공부하면 합격할 거예요.",
+                    "Translate: 'When it rains, I stay home.'": "비가 오면 집에 있어요.",
+                    "Does tense affect the ~으면 clause?": "No — tense goes on the result clause (final verb) only.",
+                },
             },
             {
                 "id": "U1L23",
@@ -677,6 +1347,31 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 17–25", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-17-25-2/"},
                 ],
+                "topik_vocab_count": 20,
+                "knowledge_bank": {
+                    "summary": (
+                        "때 = 'time / when'. "
+                        "Present/future: verb stem + ㄹ/을 때. "
+                        "Past (when I was doing): verb + 았/었을 때. "
+                        "~면 = conditional 'if'. ~때 = time-reference 'when'."
+                    ),
+                    "facts": [
+                        "공부할 때 커피를 마셔요 = When I study, I drink coffee.",
+                        "어렸을 때 = when I was young (past).",
+                        "바쁠 때 = when (I am) busy.",
+                        "~(으)면 is conditional; ~ㄹ/을 때 is a time reference — not interchangeable.",
+                    ],
+                    "grammar_rules": [
+                        "Vowel stem + ㄹ 때: 공부하 + ㄹ 때 = 공부할 때.",
+                        "Consonant stem + 을 때: 먹 + 을 때 = 먹을 때.",
+                        "Past time: 먹었을 때 (when I ate/was eating).",
+                    ],
+                },
+                "expected_answers": {
+                    "Translate: 'When I study, I drink coffee.'": "공부할 때 커피를 마셔요.",
+                    "Translate: 'When I was young, I liked this.'": "어렸을 때 이걸 좋아했어요.",
+                    "Form after vowel-stem / consonant-stem?": "Vowel stem + ㄹ 때 (공부할 때). Consonant stem + 을 때 (먹을 때).",
+                },
             },
             {
                 "id": "U1L24",
@@ -701,6 +1396,30 @@ CURRICULUM = {
                 "resources": [
                     {"name": "HTSK Lessons 17–25", "url": "https://www.howtostudykorean.com/unit1/unit-1-lessons-17-25-2/"},
                 ],
+                "topik_vocab_count": 20,
+                "knowledge_bank": {
+                    "summary": (
+                        "기 전에 = before doing (verb stem + 기 전에). "
+                        "~(으)ㄴ 후에 = after doing (verb past modifier + 후에). "
+                        "~고 나서 = after doing (more casual alternative to 후에)."
+                    ),
+                    "facts": [
+                        "자기 전에 이를 닦아요 = Before sleeping, I brush my teeth.",
+                        "먹은 후에 공부했어요 = After eating, I studied.",
+                        "먹고 나서 공부했어요 = After eating, I studied (고 나서 form).",
+                        "전에 uses the verb in dictionary form + 기. 후에 uses past modifier + 후에.",
+                    ],
+                    "grammar_rules": [
+                        "Before: verb stem + 기 전에: 자 + 기 전에 = 자기 전에.",
+                        "After: past modifier + 후에: 먹 + 은 후에 = 먹은 후에.",
+                        "After (casual): verb stem + 고 나서: 먹고 나서.",
+                    ],
+                },
+                "expected_answers": {
+                    "Translate: 'Before sleeping, I brush my teeth.'": "자기 전에 이를 닦아요.",
+                    "Translate: 'After eating, I studied.'": "먹은 후에 공부했어요. (or 먹고 나서 공부했어요)",
+                    "Form of 전에 and 후에 with 먹다.": "전에: 먹기 전에. 후에: 먹은 후에.",
+                },
             },
             {
                 "id": "U1L25",
@@ -726,6 +1445,30 @@ CURRICULUM = {
                     {"name": "Unit 1 Test", "url": "https://www.howtostudykorean.com/unit1/unit-1-test/"},
                     {"name": "HTSK Anki Deck", "url": "https://www.howtostudykorean.com/anki/"},
                 ],
+                "topik_vocab_count": 50,
+                "knowledge_bank": {
+                    "summary": (
+                        "Unit 1 covers 25 lessons of core Korean grammar. Key grammar points: "
+                        "이다, particles (이/가, 은/는, 을/를, 에, 에서, 의), present/past/future tense, "
+                        "negation (안, 지 않다), connectors (고, 지만, 아/어서, 으면, 때, 전에, 후에), "
+                        "ability (ㄹ 수 있다), wanting (고 싶다), nominalisation (는 것). "
+                        "Vocabulary target: ~400 words towards TOPIK I."
+                    ),
+                    "facts": [
+                        "Particles: 이/가 (subject), 은/는 (topic), 을/를 (object), 에 (location/direction), 에서 (action location), 의 (possessive).",
+                        "Tense: present (아/어요), past (았/었어요), future (ㄹ/을 거예요).",
+                        "Negation: 안 + verb (casual), verb + 지 않아요 (formal).",
+                        "Connectors covered: 고 (and then), 지만 (but), 아/어서 (because/after), 으면 (if/when), 때 (when), 기 전에 (before), 은 후에 (after).",
+                    ],
+                },
+                "expected_answers": {
+                    "List all particles from Unit 1 and what each does.": (
+                        "이/가: subject. 은/는: topic. 을/를: object. 에: location/direction. "
+                        "에서: action location. 의: possessive. 와/과/하고/이랑: 'and'."
+                    ),
+                    "Name 5 connectors from Unit 1.": "~고 (and then), ~지만 (but), ~아/어서 (because/after), ~(으)면 (if), ~때 (when).",
+                    "What is the TOPIK vocab target for Unit 1?": "Approximately 400 words — roughly one third of the TOPIK I target.",
+                },
             },
         ],
     },
@@ -1596,3 +2339,42 @@ def get_unit_progress_summary(progress_data):
             "level": unit_data["level"],
         }
     return summary
+
+
+# ─── TOPIK Progress Helpers ───────────────────────────────────────────────────
+
+def get_topik_vocab_total(progress_data: dict) -> int:
+    """
+    Return the cumulative TOPIK I vocab count for all completed lessons.
+    Uses `topik_vocab_count` field on each lesson (defaults to 0 if absent).
+    Compare against TOPIK_I_TARGET (1200) to show measurable progress.
+    """
+    total = 0
+    for unit_data in CURRICULUM.values():
+        for lesson in unit_data["lessons"]:
+            if progress_data.get(lesson["id"], {}).get("status") == "completed":
+                total += lesson.get("topik_vocab_count", 0)
+    return total
+
+
+def get_topik_progress_summary(progress_data: dict) -> dict:
+    """
+    Return a dict with TOPIK vocab progress stats.
+    {
+        'words_known': int,
+        'target': int (TOPIK_I_TARGET),
+        'full': int (TOPIK_I_FULL),
+        'percent_of_target': float,
+        'percent_of_full': float,
+        'ready_for_topik': bool,
+    }
+    """
+    known = get_topik_vocab_total(progress_data)
+    return {
+        "words_known": known,
+        "target": TOPIK_I_TARGET,
+        "full": TOPIK_I_FULL,
+        "percent_of_target": round(known / TOPIK_I_TARGET * 100, 1),
+        "percent_of_full": round(known / TOPIK_I_FULL * 100, 1),
+        "ready_for_topik": known >= TOPIK_I_TARGET,
+    }
