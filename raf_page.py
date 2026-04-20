@@ -327,7 +327,7 @@ def page_raf():
     # ─────────────────────────────────────────────────────────────────────────
     elif view == "lesson":
         try:
-            from app import render_lesson_view
+            from app import render_lesson_viewer
             from data.raf_curriculum import RAF_CURRICULUM
             active = st.session_state.get("R_active_lesson")
             if not active:
@@ -335,10 +335,15 @@ def page_raf():
                 return
 
             lesson = None
-            for unit_data in RAF_CURRICULUM.values():
+            unit_color = "#b71c1c"
+            unit_level = ""
+            for unit_name, unit_data in RAF_CURRICULUM.items():
                 for l in unit_data["lessons"]:
                     if l["id"] == active:
                         lesson = l
+                        lesson["unit"] = unit_name
+                        unit_color = unit_data.get("color", "#b71c1c")
+                        unit_level = unit_data.get("level", "")
                         break
 
             if not lesson:
@@ -350,15 +355,10 @@ def page_raf():
                 st.session_state.pop("R_active_lesson", None)
                 st.rerun()
 
-            render_lesson_view(
-                lesson, progress.get(active, {}), active,
-                lesson.get("unit", "Tier 1 — OASC Critical"),
-                RAF_CURRICULUM.get(lesson.get("unit", "Tier 1 — OASC Critical"), {}).get("color", "#b71c1c"),
-                RAF_CURRICULUM.get(lesson.get("unit", "Tier 1 — OASC Critical"), {}).get("level", ""),
-            )
+            render_lesson_viewer(lesson, unit_color, unit_level)
+
         except Exception as e:
             st.error(f"Error loading lesson viewer: {e}")
-            st.info("Make sure render_lesson_view is exported from app.py.")
 
     # ─────────────────────────────────────────────────────────────────────────
     # VIEW: OASC AI Analysis
