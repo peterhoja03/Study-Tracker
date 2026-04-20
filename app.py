@@ -465,6 +465,7 @@ def render_sidebar():
             "🇰🇷  Korean": "korean",
             "⚛️  Physics": "physics",
             "✈️  RAF Application": "raf",
+            "🎯  CBAT Tracker": "cbat",
             "🤖  AI Tools": "ai_tools",
         }
         if "current_page" not in st.session_state:
@@ -1376,10 +1377,8 @@ def page_physics():
     render_subject_page("Physics", PHYSICS_CURRICULUM, "P", "#3498db", "⚛️")
 
 def page_raf():
-    from data.raf_curriculum import RAF_CURRICULUM
-    st.markdown("# ✈️ RAF Application")
-    st.markdown("*Targeted prep for: Medical → CBAT → OASC → IOT*")
-    render_subject_page("RAF", RAF_CURRICULUM, "R", "#1a3a6e", "✈️")
+    from raf_page import page_raf as _raf_page
+    _raf_page()
 
 # ─── Main ─────────────────────────────────────────────────────────────────────
 
@@ -1395,6 +1394,9 @@ def main():
          elif page == "korean": page_korean()
          elif page == "physics": page_physics()
          elif page == "raf": page_raf()
+         elif page == "cbat":
+             from cbat_page import page_cbat
+             page_cbat()
          elif page == "ai_tools":
              from ai_tools import page_ai_tools
              page_ai_tools()
