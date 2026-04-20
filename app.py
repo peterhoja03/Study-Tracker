@@ -644,9 +644,16 @@ def _render_reviews_panel(all_prog, K_CUR, P_CUR, R_CUR):
 
 def page_overview():
     _t = _theme()
-    from data.korean_curriculum import CURRICULUM as K_CUR
+    from data.korean_curriculum import CURRICULUM as K_CUR, get_topik_progress_summary, TOPIK_I_TARGET
     from data.physics_curriculum import PHYSICS_CURRICULUM as P_CUR
-    from data.raf_curriculum import RAF_CURRICULUM as R_CUR
+    from data.raf_curriculum import RAF_CURRICULUM as R_CUR, get_tier1_readiness, CONFIDENCE_LABELS
+
+    dark = st.session_state.get("dark_mode", False)
+    card_bg   = "#161b22" if dark else "#ffffff"
+    card_bdr  = "#30363d" if dark else "#e8e8f0"
+    text_col  = "#e6edf3" if dark else "#1a1a2e"
+    sub_col   = "#8b949e" if dark else "#666"
+    prog_bg   = "#21262d" if dark else "#eeeeee"
 
     st.markdown("# 🎯 Overview")
     st.markdown(f"*{date.today().strftime('%A, %d %B %Y')}*")
@@ -655,20 +662,18 @@ def page_overview():
     all_prog = load_progress()
     sessions = load_sessions()
     streak = get_streak()
-    hours = round(total_time()/60,1)
+    hours = round(total_time() / 60, 1)
 
-    # ── Today's Goal Prompt ──
+    # ── Next lesson per subject ───────────────────────────────────────────────
     today_name = date.today().strftime("%A")
-    all_prog_early = load_progress()
 
-    # Work out what to focus on for each subject today
     def next_lesson_id(prefix, curriculum):
-        in_prog = [k for k,v in all_prog_early.items() if k.startswith(prefix) and v.get("status")=="in_progress"]
+        in_prog = [k for k, v in all_prog.items() if k.startswith(prefix) and v.get("status") == "in_progress"]
         if in_prog: return in_prog[0], "continue"
         due = get_due(prefix)
         if due: return due[0], "review"
         all_l = [l["id"] for u in curriculum.values() for l in u["lessons"]]
-        not_started = [l for l in all_l if all_prog_early.get(l,{}).get("status","not_started")=="not_started"]
+        not_started = [l for l in all_l if all_prog.get(l, {}).get("status", "not_started") == "not_started"]
         if not_started: return not_started[0], "start"
         return None, "done"
 
@@ -676,126 +681,191 @@ def page_overview():
     p_id, p_type = next_lesson_id("P", P_CUR)
     r_id, r_type = next_lesson_id("R", R_CUR)
 
-    type_labels = {"continue":"▶️ Continue","review":"🔄 Review","start":"🆕 Start","done":"✅ All done"}
-    type_colors = {"continue":"#f39c12","review":"#e74c3c","start":"#27ae60","done":"#888"}
+    type_labels = {"continue": "▶️ Continue", "review": "🔄 Review", "start": "🆕 Start", "done": "✅ All done"}
+    type_colors = {"continue": "#f39c12", "review": "#e74c3c", "start": "#27ae60", "done": "#888"}
 
-    # Schedule context based on your weekly routine
     schedule_notes = {
-        "Monday":    ("🏃 Run + calisthenics morning", "Good day for a full 3-block study session after your workout."),
-        "Tuesday":   ("🏑 Hockey tonight", "Study before hockey — get all 3 blocks done this morning/afternoon."),
-        "Wednesday": ("Rest day", "Full study day — aim for all 3 blocks."),
-        "Thursday":  ("🏑 Hockey tonight", "Study before hockey — get all 3 blocks done this morning/afternoon."),
-        "Friday":    ("Rest day", "Good study day — no evening commitments."),
+        "Monday":    ("🏃 Run + calisthenics", "Delivery morning — 1 study block after your workout."),
+        "Tuesday":   ("🏑 Hockey tonight", "Study before hockey — aim for all 3 blocks this morning."),
+        "Wednesday": ("🏃 Run + calisthenics", "Delivery morning — 1 study block."),
+        "Thursday":  ("🏑 Hockey tonight", "Best study day — 3–4 blocks before hockey."),
+        "Friday":    ("🏃 Run + calisthenics", "Delivery morning — 1 study block."),
         "Saturday":  ("🏑 Hockey this afternoon", "Study in the morning before hockey."),
-        "Sunday":    ("Rest day", "Lighter day — even 1-2 blocks keeps the streak going."),
+        "Sunday":    ("Rest day", "Lighter day — even 1–2 blocks keeps the streak going."),
     }
     activity, advice = schedule_notes.get(today_name, ("", ""))
 
+    # ── Today's focus banner ──────────────────────────────────────────────────
     st.markdown(f"""
     <div style="background:linear-gradient(135deg,#0d1b2a,#1a3a5c);border-radius:16px;padding:1.4rem 1.8rem;
-                margin-bottom:1.5rem;border:1px solid #1e3a5f;color:white">
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.4rem;margin-bottom:.5rem">
+                margin-bottom:1.2rem;border:1px solid #1e3a5f;color:white">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.4rem;margin-bottom:.4rem">
             <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:#6a8ab0">
-                🗓️ Today's Focus — {today_name}
+                🗓️ Today — {today_name}
             </div>
             <div style="font-size:.78rem;color:#6a8ab0">{activity}</div>
         </div>
         <div style="font-size:.82rem;color:#a8c0d8;margin-bottom:1rem;font-style:italic">{advice}</div>
         <div style="display:flex;gap:1.5rem;flex-wrap:wrap">
-            <div style="flex:1;min-width:140px">
-                <span style="color:#aaa;font-size:.72rem">🇰🇷 KOREAN</span><br>
+            <div style="flex:1;min-width:130px">
+                <div style="color:#aaa;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.2rem">🇰🇷 Korean</div>
                 <span style="color:{type_colors[k_type]};font-size:.82rem;font-weight:600">{type_labels[k_type]}</span>
-                <span style="color:#ddd;font-size:.82rem"> {k_id or ''}</span>
+                <span style="color:#ddd;font-size:.8rem"> {k_id or ''}</span>
             </div>
-            <div style="flex:1;min-width:140px">
-                <span style="color:#aaa;font-size:.72rem">⚛️ PHYSICS</span><br>
+            <div style="flex:1;min-width:130px">
+                <div style="color:#aaa;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.2rem">⚛️ Physics</div>
                 <span style="color:{type_colors[p_type]};font-size:.82rem;font-weight:600">{type_labels[p_type]}</span>
-                <span style="color:#ddd;font-size:.82rem"> {p_id or ''}</span>
+                <span style="color:#ddd;font-size:.8rem"> {p_id or ''}</span>
             </div>
-            <div style="flex:1;min-width:140px">
-                <span style="color:#aaa;font-size:.72rem">✈️ RAF</span><br>
+            <div style="flex:1;min-width:130px">
+                <div style="color:#aaa;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.2rem">✈️ RAF</div>
                 <span style="color:{type_colors[r_type]};font-size:.82rem;font-weight:600">{type_labels[r_type]}</span>
-                <span style="color:#ddd;font-size:.82rem"> {r_id or ''}</span>
+                <span style="color:#ddd;font-size:.8rem"> {r_id or ''}</span>
             </div>
-            <div style="flex:1;min-width:140px;border-left:1px solid #1e3a5f;padding-left:1.2rem">
-                <span style="color:#aaa;font-size:.72rem">⏱ TARGET</span><br>
+            <div style="flex:1;min-width:130px;border-left:1px solid #1e3a5f;padding-left:1.2rem">
+                <div style="color:#aaa;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.2rem">⏱ Target</div>
                 <span style="color:white;font-size:.82rem;font-weight:600">3 × 25 min blocks</span><br>
-                <span style="color:#6a8ab0;font-size:.75rem">~75 min total</span>
+                <span style="color:#6a8ab0;font-size:.74rem">~75 min total</span>
             </div>
         </div>
     </div>""", unsafe_allow_html=True)
 
-    # Stats row
-    k_lessons = sum(len(u["lessons"]) for u in K_CUR.values())
-    p_lessons = sum(len(u["lessons"]) for u in P_CUR.values())
-    r_lessons = sum(len(u["lessons"]) for u in R_CUR.values())
-    total_lessons = k_lessons + p_lessons + r_lessons
-    done = sum(1 for d in all_prog.values() if d.get("status")=="completed")
+    # ── Stats row ─────────────────────────────────────────────────────────────
+    total_lessons = sum(len(u["lessons"]) for cur in [K_CUR, P_CUR, R_CUR] for u in cur.values())
+    done = sum(1 for d in all_prog.values() if d.get("status") == "completed")
 
-    c1,c2,c3,c4,c5 = st.columns(5)
-    for col,num,label in [
-        (c1,f"🔥 {streak}","Day Streak"),
-        (c2,str(done),"Lessons Done"),
-        (c3,str(total_lessons),"Total Lessons"),
-        (c4,f"{hours}h","Study Time"),
-        (c5,str(len(sessions)),"Sessions Logged"),
+    c1, c2, c3, c4, c5 = st.columns(5)
+    for col, num, label in [
+        (c1, f"🔥 {streak}", "Day Streak"),
+        (c2, str(done), "Lessons Done"),
+        (c3, str(total_lessons), "Total Lessons"),
+        (c4, f"{hours}h", "Study Time"),
+        (c5, str(len(sessions)), "Sessions Logged"),
     ]:
         with col:
-            st.markdown(f'<div class="stat-card"><div class="stat-number">{num}</div><div class="stat-label">{label}</div></div>', unsafe_allow_html=True)
+            st.markdown(
+                f'<div class="stat-card"><div class="stat-number">{num}</div>'
+                f'<div class="stat-label">{label}</div></div>',
+                unsafe_allow_html=True,
+            )
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # ── Reviews Section ──
+    # ── Reviews panel ─────────────────────────────────────────────────────────
     _render_reviews_panel(all_prog, K_CUR, P_CUR, R_CUR)
-
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Subject progress cards
-    col_left, col_right = st.columns([3,2])
+    # ── Subject progress + Today's plan ──────────────────────────────────────
+    col_left, col_right = st.columns([3, 2])
 
     with col_left:
         st.subheader("📊 Progress by Subject")
 
-        subjects = [
-            ("🇰🇷 Korean Language", K_CUR, "#e74c3c", "korean", "U"),
-            ("⚛️ Physics (AQA GCSE)", P_CUR, "#3498db", "physics", "P"),
-            ("✈️ RAF Application", R_CUR, "#1a3a6e", "raf", "R"),
-        ]
+        # ── Korean ──
+        k_total = sum(len(u["lessons"]) for u in K_CUR.values())
+        k_done  = sum(1 for k, d in all_prog.items() if k.startswith("U") and d.get("status") == "completed")
+        k_pct   = round(k_done / k_total * 100) if k_total else 0
+        k_due   = len(get_due("U"))
+        topik   = get_topik_progress_summary(all_prog)
+        vocab_pct = min(round(topik["words_known"] / TOPIK_I_TARGET * 100), 100)
 
-        for name, curriculum, color, page_key, prefix in subjects:
-            total = sum(len(u["lessons"]) for u in curriculum.values())
-            done_s = sum(1 for k,d in all_prog.items() if k.startswith(prefix) and d.get("status")=="completed")
-            pct = round(done_s/total*100) if total else 0
-            due_count = len(get_due(prefix))
+        st.markdown(
+            f'<div style="background:{card_bg};border-radius:14px;padding:1.1rem 1.4rem;margin-bottom:.7rem;'
+            f'border:1px solid {card_bdr};border-left:5px solid #e74c3c">'
+            f'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.5rem">'
+            f'<span style="font-weight:700;font-size:.95rem;color:{text_col}">🇰🇷 Korean Language</span>'
+            f'<span style="font-size:.78rem;color:{sub_col}">{k_done}/{k_total} lessons</span></div>'
+            f'<div style="background:{prog_bg};border-radius:4px;height:6px;overflow:hidden;margin-bottom:.4rem">'
+            f'<div style="width:{k_pct}%;height:100%;background:#e74c3c;border-radius:4px"></div></div>'
+            f'<div style="display:flex;gap:1rem;font-size:.75rem;color:{sub_col}">'
+            f'<span>Grammar: {k_pct}%</span>'
+            f'<span>Vocab: {topik["words_known"]}/{TOPIK_I_TARGET} words ({vocab_pct}% to TOPIK I)</span>'
+            + (f'<span style="color:#e74c3c;font-weight:600">🔄 {k_due} review(s) due</span>' if k_due else '')
+            + f'</div></div>',
+            unsafe_allow_html=True,
+        )
+        if st.button("Go to Korean →", key="goto_korean"):
+            st.session_state.current_page = "korean"; st.rerun()
 
-            st.markdown(f"""
-            <div style="background:{_t['card_bg']};border-radius:14px;padding:1.2rem 1.5rem;margin-bottom:.8rem;
-                        border:1px solid {_t['card_border']};border-left:5px solid {color};">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
-                    <span style="font-weight:700;font-size:1rem">{name}</span>
-                    <span style="font-size:.82rem;color:#888">{done_s}/{total} lessons · {pct}%</span>
-                </div>
-                <div class="progress-bar-container">
-                    <div class="progress-bar-fill" style="width:{pct}%;background:{color}"></div>
-                </div>
-                {'<span style="font-size:.75rem;color:#e74c3c;font-weight:600">🔄 ' + str(due_count) + ' review(s) due</span>' if due_count > 0 else '<span style="font-size:.75rem;color:#888">No reviews due</span>'}
-            </div>""", unsafe_allow_html=True)
+        # ── Physics ──
+        p_total = sum(len(u["lessons"]) for u in P_CUR.values())
+        p_done  = sum(1 for k, d in all_prog.items() if k.startswith("P") and d.get("status") == "completed")
+        p_pct   = round(p_done / p_total * 100) if p_total else 0
+        p_due   = len(get_due("P"))
+        p_units = len(P_CUR)
+        p_units_done = sum(
+            1 for uname, ud in P_CUR.items()
+            if all(all_prog.get(l["id"], {}).get("status") == "completed" for l in ud["lessons"])
+        )
 
-            if st.button(f"Go to {name.split()[1]} →", key=f"goto_{page_key}", use_container_width=False):
-                st.session_state.current_page = page_key
-                st.rerun()
+        st.markdown(
+            f'<div style="background:{card_bg};border-radius:14px;padding:1.1rem 1.4rem;margin-bottom:.7rem;'
+            f'border:1px solid {card_bdr};border-left:5px solid #3498db">'
+            f'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.5rem">'
+            f'<span style="font-weight:700;font-size:.95rem;color:{text_col}">⚛️ Physics — AQA GCSE</span>'
+            f'<span style="font-size:.78rem;color:{sub_col}">{p_done}/{p_total} lessons</span></div>'
+            f'<div style="background:{prog_bg};border-radius:4px;height:6px;overflow:hidden;margin-bottom:.4rem">'
+            f'<div style="width:{p_pct}%;height:100%;background:#3498db;border-radius:4px"></div></div>'
+            f'<div style="display:flex;gap:1rem;font-size:.75rem;color:{sub_col}">'
+            f'<span>{p_pct}% complete · {p_units_done}/{p_units} topics finished</span>'
+            + (f'<span style="color:#e74c3c;font-weight:600">🔄 {p_due} review(s) due</span>' if p_due else '')
+            + f'</div></div>',
+            unsafe_allow_html=True,
+        )
+        if st.button("Go to Physics →", key="goto_physics"):
+            st.session_state.current_page = "physics"; st.rerun()
+
+        # ── RAF ──
+        r_total = sum(len(u["lessons"]) for u in R_CUR.values())
+        r_done  = sum(1 for k, d in all_prog.items() if k.startswith("R") and d.get("status") == "completed")
+        r_pct   = round(r_done / r_total * 100) if r_total else 0
+        r_due   = len(get_due("R"))
+        t1_stats = get_tier1_readiness(all_prog)
+        ready_pct = t1_stats["ready_pct"]
+        ready_color = "#27ae60" if ready_pct >= 75 else "#f39c12" if ready_pct >= 40 else "#e74c3c"
+
+        try:
+            from cbat_page import load_cbat_sessions
+            cbat_n = len(load_cbat_sessions())
+            cbat_subtests = len(set(s["subtest_id"] for s in load_cbat_sessions()))
+        except Exception:
+            cbat_n, cbat_subtests = 0, 0
+
+        st.markdown(
+            f'<div style="background:{card_bg};border-radius:14px;padding:1.1rem 1.4rem;margin-bottom:.7rem;'
+            f'border:1px solid {card_bdr};border-left:5px solid #1a3a6e">'
+            f'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:.5rem">'
+            f'<span style="font-weight:700;font-size:.95rem;color:{text_col}">✈️ RAF Application</span>'
+            f'<span style="font-size:.78rem;color:{sub_col}">{r_done}/{r_total} lessons</span></div>'
+            f'<div style="background:{prog_bg};border-radius:4px;height:6px;overflow:hidden;margin-bottom:.4rem">'
+            f'<div style="width:{r_pct}%;height:100%;background:#1a3a6e;border-radius:4px"></div></div>'
+            f'<div style="display:flex;gap:1rem;flex-wrap:wrap;font-size:.75rem;color:{sub_col}">'
+            f'<span style="color:{ready_color};font-weight:600">🔴 Tier 1 OASC: {ready_pct}% interview-ready '
+            f'({t1_stats["at_3"]}/{t1_stats["total"]})</span>'
+            f'<span>🎯 CBAT: {cbat_n} session(s) · {cbat_subtests}/23 subtests</span>'
+            + (f'<span style="color:#e74c3c;font-weight:600">🔄 {r_due} review(s) due</span>' if r_due else '')
+            + f'</div></div>',
+            unsafe_allow_html=True,
+        )
+        c_raf1, c_raf2 = st.columns(2)
+        with c_raf1:
+            if st.button("Go to RAF →", key="goto_raf"):
+                st.session_state.current_page = "raf"; st.rerun()
+        with c_raf2:
+            if st.button("🎯 CBAT Tracker →", key="goto_cbat"):
+                st.session_state.current_page = "cbat"; st.rerun()
 
     with col_right:
         st.subheader("🗓️ Today's Plan")
         day = date.today().weekday()
         wpp = {
-            0: {"label":"Monday — Work + Fitness","blocks":1,"note":"1 study block · Morning only · Rest after Amazon","color":"#e74c3c"},
-            1: {"label":"Tuesday — Study Day","blocks":3,"note":"2–3 study blocks · Full morning available","color":"#27ae60"},
-            2: {"label":"Wednesday — Work + Fitness","blocks":1,"note":"1 study block · Morning only · Rest after Amazon","color":"#e74c3c"},
-            3: {"label":"Thursday — Full Study Day","blocks":4,"note":"3–4 study blocks · Best day of the week","color":"#27ae60"},
-            4: {"label":"Friday — Work + Fitness","blocks":1,"note":"1 study block · Morning only · Friday evening is free","color":"#e74c3c"},
-            5: {"label":"Saturday — Optional","blocks":1,"note":"1 optional block · GF time takes priority","color":"#f39c12"},
-            6: {"label":"Sunday — Flexible","blocks":2,"note":"Anki + 1–2 if natural · Never forced","color":"#8e44ad"},
+            0: {"label": "Monday — Delivery + Fitness", "blocks": 1, "note": "1 block · Study after morning run", "color": "#e74c3c"},
+            1: {"label": "Tuesday — Study Day",          "blocks": 3, "note": "2–3 blocks · Full morning available", "color": "#27ae60"},
+            2: {"label": "Wednesday — Delivery + Fitness","blocks": 1, "note": "1 block · Morning only", "color": "#e74c3c"},
+            3: {"label": "Thursday — Full Study Day",    "blocks": 4, "note": "3–4 blocks · Best day of the week", "color": "#27ae60"},
+            4: {"label": "Friday — Delivery + Fitness",  "blocks": 1, "note": "1 block · Morning only", "color": "#e74c3c"},
+            5: {"label": "Saturday — Optional",          "blocks": 1, "note": "1 optional block · Hockey this afternoon", "color": "#f39c12"},
+            6: {"label": "Sunday — Flexible",            "blocks": 2, "note": "Anki + 1–2 blocks if natural", "color": "#8e44ad"},
         }
         tw = wpp[day]
         blocks = tw["blocks"]
@@ -803,22 +873,23 @@ def page_overview():
         <div class="today-card">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem">
                 <strong>{tw['label']}</strong>
-                <span style="background:{tw['color']};color:white;border-radius:999px;padding:.15rem .65rem;font-size:.72rem;font-weight:700">{blocks} block{'s' if blocks>1 else ''}</span>
+                <span style="background:{tw['color']};color:white;border-radius:999px;padding:.15rem .65rem;
+                             font-size:.72rem;font-weight:700">{blocks} block{'s' if blocks > 1 else ''}</span>
             </div>
             <span style="font-size:.8rem;opacity:.8">{tw['note']}</span><br>
-            <span style="font-size:.75rem;opacity:.6">🔑 Anki: 10 min Korean · Morning before coffee</span>
+            <span style="font-size:.75rem;opacity:.6">🔑 Anki: 10 min Korean · Before coffee</span>
         </div>""", unsafe_allow_html=True)
+
         subject_order = [
-            ("Korean","U","korean","🇰🇷"),
-            ("Physics","P","physics","⚛️"),
-            ("RAF","R","raf","✈️"),
+            ("Korean", "U", "korean", "🇰🇷"),
+            ("Physics", "P", "physics", "⚛️"),
+            ("RAF",     "R", "raf",     "✈️"),
         ]
         shown = 0
-        for name, prefix, page_key, icon in subject_order:
+        for sname, prefix, page_key, icon in subject_order:
             if shown >= blocks and blocks < 3:
                 break
-            prog = {k:v for k,v in all_prog.items() if k.startswith(prefix)}
-            in_prog = [k for k,v in prog.items() if v.get("status")=="in_progress"]
+            in_prog  = [k for k, v in all_prog.items() if k.startswith(prefix) and v.get("status") == "in_progress"]
             due_items = get_due(prefix)
             if in_prog:
                 label = f"Continue: {in_prog[0]}"
@@ -829,15 +900,30 @@ def page_overview():
             else:
                 label = "Start next lesson"
                 border_col = "#27ae60"
-            st.markdown(f'''<div class="wpp-block" style="border-left:3px solid {border_col}">
-                {icon} <strong>{name}</strong> · <span style="font-size:.82rem">{label}</span>
-            </div>''', unsafe_allow_html=True)
+            st.markdown(
+                f'<div class="wpp-block" style="border-left:3px solid {border_col}">'
+                f'{icon} <strong>{sname}</strong> · <span style="font-size:.82rem">{label}</span></div>',
+                unsafe_allow_html=True,
+            )
             shown += 1
+
+        # RAF quick status
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown(
+            f'<div style="background:{card_bg};border:1px solid {card_bdr};border-left:3px solid #1a3a6e;'
+            f'border-radius:8px;padding:.7rem 1rem;font-size:.8rem">'
+            f'<div style="font-weight:700;color:{text_col};margin-bottom:.3rem">✈️ RAF Application Status</div>'
+            f'<div style="color:{sub_col}">✅ Application · ✅ DAA · ✅ ID check</div>'
+            f'<div style="color:#f39c12;font-weight:600;margin-top:.2rem">🎯 Next: Medical examination</div>'
+            f'<div style="color:{sub_col};margin-top:.2rem">Then: CBAT → OASC</div>'
+            f'</div>',
+            unsafe_allow_html=True,
+        )
 
     st.markdown("---")
 
-    # ── End Goals & Roadmaps ──
-    st.subheader("🚀 Your End Goals & Roadmaps")
+    # ── End Goals & Roadmaps ─────────────────────────────────────────────────
+    st.subheader("🚀 End Goals & Roadmaps")
     st.markdown("*The bigger picture — where all of this is heading*")
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -845,72 +931,69 @@ def page_overview():
 
     with goal_col1:
         st.markdown("""
-        <div style="background:linear-gradient(135deg,#c0392b,#e74c3c);border-radius:16px;padding:1.5rem;color:white;text-align:center;margin-bottom:1rem">
+        <div style="background:linear-gradient(135deg,#c0392b,#e74c3c);border-radius:16px;padding:1.5rem;
+                    color:white;text-align:center;margin-bottom:1rem">
             <div style="font-size:2.5rem">🇰🇷</div>
             <h3 style="margin:.5rem 0 .2rem;font-family:Georgia,serif">Korean Fluency</h3>
             <p style="font-size:.82rem;opacity:.85;margin:0">Conversational with her family</p>
         </div>""", unsafe_allow_html=True)
-
-        with st.expander("📋 Step-by-step roadmap"):
-            steps = [
-                ("✅ Current", "Absolute beginner — starting HTSK Unit 0", "done"),
-                ("🎯 Next", "Complete Hangul (Unit 0) — read Korean script", "current"),
-                ("📍 3 months", "Finish Unit 1 — basic sentences and grammar", ""),
-                ("📍 6 months", "Finish Unit 2 — hold simple conversations", ""),
-                ("📍 12 months", "Unit 3-4 complete — discuss everyday topics", ""),
-                ("📍 18 months", "Unit 5-6 — watch Korean TV without subtitles", ""),
-                ("🏁 Goal", "Conversational with her family — Unit 7+ complete", ""),
-            ]
-            for label, desc, status in steps:
-                cls = "done" if status=="done" else ("current" if status=="current" else "roadmap-step")
+        with st.expander("📋 Roadmap"):
+            for label, desc, s in [
+                ("🎯 Now",      "HTSK Unit 0 — Hangul & pronunciation",           "current"),
+                ("📍 Month 1",  "Unit 0 complete — reading Korean script",         ""),
+                ("📍 Month 3",  "Unit 1 complete — basic sentences & grammar",     ""),
+                ("📍 Month 6",  "Unit 2 — hold simple conversations",              ""),
+                ("📍 Month 12", "Units 3-4 — discuss everyday topics",             ""),
+                ("📍 Month 18", "Units 5-6 — TV without subtitles",                ""),
+                ("🏁 Goal",     "Conversational with her family — Unit 7+",        ""),
+            ]:
+                cls = "done" if s == "done" else ("current" if s == "current" else "roadmap-step")
                 st.markdown(f'<div class="roadmap-step {cls}" style="margin-bottom:.4rem"><strong>{label}:</strong> {desc}</div>', unsafe_allow_html=True)
 
     with goal_col2:
         st.markdown("""
-        <div style="background:linear-gradient(135deg,#1a3a6e,#2e4d9e);border-radius:16px;padding:1.5rem;color:white;text-align:center;margin-bottom:1rem">
+        <div style="background:linear-gradient(135deg,#1a3a6e,#2e4d9e);border-radius:16px;padding:1.5rem;
+                    color:white;text-align:center;margin-bottom:1rem">
             <div style="font-size:2.5rem">✈️</div>
             <h3 style="margin:.5rem 0 .2rem;font-family:Georgia,serif">RAF Pilot</h3>
             <p style="font-size:.82rem;opacity:.85;margin:0">Commission & earn your wings</p>
         </div>""", unsafe_allow_html=True)
-
-        with st.expander("📋 Step-by-step roadmap"):
-            steps = [
-                ("✅ Done", "Initial application submitted", "done"),
-                ("✅ Done", "DAA (Digital Aptitude Assessment)", "done"),
-                ("✅ Done", "ID check at AFCO", "done"),
-                ("🎯 Next", "Medical examination — pass all standards", "current"),
-                ("📍 Soon", "CBAT — computer aptitude tests", ""),
-                ("📍 Soon", "OASC — Officer & Aircrew Selection Centre", ""),
-                ("📍 Pass", "IOT — Initial Officer Training, RAF Cranwell (30 wks)", ""),
-                ("📍 Training", "EFTS — Elementary Flying (Grob Prefect)", ""),
-                ("📍 Training", "BFJT/AFJT — Basic/Advanced Flying Training", ""),
-                ("🏁 Goal", "Wings ceremony — front-line fast jet posting", ""),
-            ]
-            for label, desc, status in steps:
-                cls = "done" if status=="done" else ("current" if status=="current" else "roadmap-step")
+        with st.expander("📋 Roadmap"):
+            for label, desc, s in [
+                ("✅ Done",      "Application submitted",                           "done"),
+                ("✅ Done",      "DAA — Digital Aptitude Assessment",               "done"),
+                ("✅ Done",      "ID check at AFCO",                                "done"),
+                ("🎯 Next",      "Medical examination",                             "current"),
+                ("📍 Soon",      "CBAT — 23 computer aptitude tests at Cranwell",   ""),
+                ("📍 Soon",      "OASC — Officer & Aircrew Selection Centre",       ""),
+                ("📍 Pass",      "IOT — Initial Officer Training (24 weeks)",       ""),
+                ("📍 Training",  "EFTS — Elementary Flying (Grob Prefect)",         ""),
+                ("📍 Training",  "BFJT → AFJT — Basic & Advanced Flying Training", ""),
+                ("🏁 Goal",      "Wings ceremony — front-line fast jet posting",    ""),
+            ]:
+                cls = "done" if s == "done" else ("current" if s == "current" else "roadmap-step")
                 st.markdown(f'<div class="roadmap-step {cls}" style="margin-bottom:.4rem"><strong>{label}:</strong> {desc}</div>', unsafe_allow_html=True)
 
     with goal_col3:
         st.markdown("""
-        <div style="background:linear-gradient(135deg,#145a32,#27ae60);border-radius:16px;padding:1.5rem;color:white;text-align:center;margin-bottom:1rem">
+        <div style="background:linear-gradient(135deg,#145a32,#27ae60);border-radius:16px;padding:1.5rem;
+                    color:white;text-align:center;margin-bottom:1rem">
             <div style="font-size:2.5rem">⚛️</div>
             <h3 style="margin:.5rem 0 .2rem;font-family:Georgia,serif">Physics Mastery</h3>
             <p style="font-size:.82rem;opacity:.85;margin:0">GCSE → Aerospace depth</p>
         </div>""", unsafe_allow_html=True)
-
-        with st.expander("📋 Step-by-step roadmap"):
-            steps = [
-                ("🎯 Now", "Topic 1 — Energy (foundations)", "current"),
-                ("📍 Month 1", "Topics 1-2 complete — Energy & Electricity", ""),
-                ("📍 Month 2", "Topics 3-4 — Particle Model & Radioactivity", ""),
-                ("📍 Month 3", "Topic 5 — Forces (key for aviation)", ""),
-                ("📍 Month 4", "Topics 6-7 — Waves & Electromagnetism", ""),
-                ("📍 Month 5", "Topic 8 — Space Physics", ""),
-                ("📍 Extension", "Aerospace physics: aerodynamics, propulsion, navigation", ""),
-                ("🏁 Goal", "Confident physics foundation to support RAF training", ""),
-            ]
-            for label, desc, status in steps:
-                cls = "done" if status=="done" else ("current" if status=="current" else "roadmap-step")
+        with st.expander("📋 Roadmap"):
+            for label, desc, s in [
+                ("🎯 Now",      "Topic 1 — Energy (AQA foundations)",              "current"),
+                ("📍 Month 1",  "Topics 1-2 — Energy & Electricity done",          ""),
+                ("📍 Month 2",  "Topics 3-4 — Particle Model & Radioactivity",     ""),
+                ("📍 Month 3",  "Topic 5 — Forces (critical for aviation)",        ""),
+                ("📍 Month 4",  "Topics 6-7 — Waves & Electromagnetism",           ""),
+                ("📍 Month 5",  "Topic 8 — Space Physics",                         ""),
+                ("📍 Extension","Aerospace: aerodynamics, propulsion, navigation", ""),
+                ("🏁 Goal",     "Solid physics foundation for RAF training",        ""),
+            ]:
+                cls = "done" if s == "done" else ("current" if s == "current" else "roadmap-step")
                 st.markdown(f'<div class="roadmap-step {cls}" style="margin-bottom:.4rem"><strong>{label}:</strong> {desc}</div>', unsafe_allow_html=True)
 
 # ─── Generic Lesson Viewer (shared by all subjects) ──────────────────────────
