@@ -1294,9 +1294,79 @@ def render_subject_page(subject_name, curriculum, prefix, color, icon):
 # ─── Subject Pages ────────────────────────────────────────────────────────────
 
 def page_korean():
-    from data.korean_curriculum import CURRICULUM
+    from data.korean_curriculum import CURRICULUM, get_topik_progress_summary, TOPIK_I_TARGET
+    _t = _theme()
+    dark = st.session_state.get("dark_mode", False)
+
     st.markdown("# 🇰🇷 Korean Language")
-    st.markdown("*Resource: [How to Study Korean](https://www.howtostudykorean.com) — work through every unit systematically*")
+    st.markdown("*Resource: [How to Study Korean](https://www.howtostudykorean.com) · Benchmark: TOPIK I vocabulary*")
+
+    # ── TOPIK progress panel ──────────────────────────────────────────────────
+    progress = load_progress()
+    topik = get_topik_progress_summary(progress)
+
+    # Lesson progress (Unit 0 + Unit 1 = 29 lessons, the measurable core)
+    u0u1_lessons = [l for u, ud in CURRICULUM.items() for l in ud["lessons"] if l["id"].startswith(("U0", "U1"))]
+    u0u1_total = len(u0u1_lessons)
+    u0u1_done = sum(1 for l in u0u1_lessons if progress.get(l["id"], {}).get("status") == "completed")
+    lesson_pct = round(u0u1_done / u0u1_total * 100) if u0u1_total else 0
+
+    vocab_pct = min(round(topik["words_known"] / TOPIK_I_TARGET * 100), 100)
+    ready_label = "✅ TOPIK I ready" if topik["ready_for_topik"] else f"{TOPIK_I_TARGET - topik['words_known']} words to go"
+    ready_color = "#27ae60" if topik["ready_for_topik"] else "#e74c3c"
+
+    card_bg   = "#161b22" if dark else "#ffffff"
+    card_bdr  = "#30363d" if dark else "#e8e8f0"
+    text_col  = "#e6edf3" if dark else "#1a1a2e"
+    sub_col   = "#8b949e" if dark else "#666"
+    prog_bg   = "#21262d" if dark else "#eeeeee"
+
+    st.markdown(f"""
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:1.2rem">
+
+      <div style="background:{card_bg};border:1px solid {card_bdr};border-left:4px solid #e74c3c;
+                  border-radius:12px;padding:1rem 1.2rem">
+        <div style="font-size:.72rem;color:{sub_col};text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem">
+          Grammar track — HTSK
+        </div>
+        <div style="font-size:1.5rem;font-weight:600;color:{text_col};margin-bottom:.3rem">
+          {u0u1_done} / {u0u1_total}
+          <span style="font-size:.8rem;font-weight:400;color:{sub_col}">lessons</span>
+        </div>
+        <div style="background:{prog_bg};border-radius:4px;height:6px;overflow:hidden;margin-bottom:.3rem">
+          <div style="width:{lesson_pct}%;height:100%;background:#e74c3c;border-radius:4px"></div>
+        </div>
+        <div style="font-size:.75rem;color:{sub_col}">Units 0–1 · {lesson_pct}% complete</div>
+      </div>
+
+      <div style="background:{card_bg};border:1px solid {card_bdr};border-left:4px solid #27ae60;
+                  border-radius:12px;padding:1rem 1.2rem">
+        <div style="font-size:.72rem;color:{sub_col};text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem">
+          Vocabulary track — TOPIK I
+        </div>
+        <div style="font-size:1.5rem;font-weight:600;color:{text_col};margin-bottom:.3rem">
+          {topik['words_known']} / {TOPIK_I_TARGET}
+          <span style="font-size:.8rem;font-weight:400;color:{sub_col}">words</span>
+        </div>
+        <div style="background:{prog_bg};border-radius:4px;height:6px;overflow:hidden;margin-bottom:.3rem">
+          <div style="width:{vocab_pct}%;height:100%;background:#27ae60;border-radius:4px"></div>
+        </div>
+        <div style="font-size:.75rem;color:{ready_color};font-weight:600">{ready_label}</div>
+      </div>
+
+      <div style="background:{card_bg};border:1px solid {card_bdr};border-left:4px solid #3498db;
+                  border-radius:12px;padding:1rem 1.2rem">
+        <div style="font-size:.72rem;color:{sub_col};text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem">
+          Next milestone
+        </div>
+        <div style="font-size:.88rem;font-weight:600;color:{text_col};margin-bottom:.3rem">HTSK Unit 1 Test</div>
+        <div style="font-size:.78rem;color:{sub_col};margin-bottom:.5rem">Complete all 25 lessons in Unit 1</div>
+        <div style="font-size:.72rem;color:{sub_col}">Then: TOPIK I exam (book when vocab ≥ 1,200)</div>
+      </div>
+
+    </div>
+    """, unsafe_allow_html=True)
+
     render_subject_page("Korean", CURRICULUM, "U", "#e74c3c", "🇰🇷")
 
 def page_physics():
