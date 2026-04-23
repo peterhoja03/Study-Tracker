@@ -286,17 +286,7 @@ SCORE_LABELS = {
 
 # ─── Supabase helpers ─────────────────────────────────────────────────────────
 
-def _sb():
-    if "supabase_client" not in st.session_state:
-        try:
-            from supabase import create_client
-            import os
-            url = st.secrets.get("SUPABASE_URL", "") or os.environ.get("SUPABASE_URL", "")
-            key = st.secrets.get("SUPABASE_KEY", "") or os.environ.get("SUPABASE_KEY", "")
-            st.session_state["supabase_client"] = create_client(url, key) if url and key else None
-        except Exception:
-            st.session_state["supabase_client"] = None
-    return st.session_state["supabase_client"]
+from db import _sb
 
 
 def save_cbat_session(subtest_id: str, score: int, resource_used: str, notes: str):
