@@ -7,6 +7,7 @@ import streamlit as st
 import hashlib
 import os
 from datetime import date, timedelta
+from db import _sb
 
 st.set_page_config(
     page_title="Study Tracker",
@@ -17,7 +18,7 @@ st.set_page_config(
 
 # ─── Password ────────────────────────────────────────────────────────────────
 
-SESSION_DURATION_HOURS = 2
+SESSION_DURATION_HOURS = 8  # Extended from 2h — avoids mid-session logouts
 _SESSION_KEY = "tracker_session"
 
 def _get_session_table():
@@ -50,7 +51,11 @@ def _clear_session_from_db():
 def check_password():
     from datetime import datetime
     def _hash(pw): return hashlib.sha256(pw.encode()).hexdigest()
-    stored = st.secrets.get("app_password_hash") or _hash(os.environ.get("TRACKER_PASSWORD","study2024"))
+    stored = st.secrets.get("app_password_hash") or os.environ.get("TRACKER_PASSWORD_HASH", "")
+
+    if not stored:
+        st.error("No password configured. Set 'app_password_hash' in your Streamlit secrets.")
+        st.stop()
 
     # Check Supabase for a persisted login session
     if not st.session_state.get("authenticated"):
@@ -58,7 +63,7 @@ def check_password():
         if row and row.get("login_time"):
             try:
                 login_time = datetime.fromisoformat(row["login_time"])
-                elapsed = (datetime.now() - login_time).total_seconds() / 3600
+                elapsed = (datetime.utcnow() - login_time).total_seconds() / 3600
                 if elapsed < SESSION_DURATION_HOURS:
                     st.session_state.authenticated = True
                     st.session_state.login_time = login_time
@@ -68,7 +73,7 @@ def check_password():
     if st.session_state.get("authenticated"):
         login_time = st.session_state.get("login_time")
         if login_time:
-            elapsed = (datetime.now() - login_time).total_seconds() / 3600
+            elapsed = (datetime.utcnow() - login_time).total_seconds() / 3600
             if elapsed < SESSION_DURATION_HOURS:
                 return True
         # Session expired
@@ -90,7 +95,7 @@ def check_password():
             pw = st.text_input("Password", type="password", placeholder="Enter password...", label_visibility="collapsed")
             if st.form_submit_button("→ Enter", use_container_width=True):
                 if _hash(pw) == stored:
-                    now = datetime.now()
+                    now = datetime.utcnow()
                     st.session_state.authenticated = True
                     st.session_state.login_time = now
                     _save_session_to_db(now.isoformat())
@@ -324,17 +329,6 @@ def _theme():
         "review_ok_txt": "#5fdb8a" if dark else "#276749",
     }
 
-def _sb():
-    if "supabase_client" not in st.session_state:
-        try:
-            from supabase import create_client
-            url = st.secrets.get("SUPABASE_URL","")
-            key = st.secrets.get("SUPABASE_KEY","")
-            st.session_state["supabase_client"] = create_client(url,key) if url and key else None
-        except Exception:
-            st.session_state["supabase_client"] = None
-    return st.session_state["supabase_client"]
-
 def load_progress(prefix=""):
     sb = _sb()
     # Fetch from Supabase once per session and cache locally
@@ -390,10 +384,8 @@ def unmark_complete(lesson_id):
     if sb:
         try: sb.table("progress").upsert(fields).execute()
         except Exception: pass
-    for key in [f"_progress_{lesson_id[:1]}", "_progress_"]:
-        prog = st.session_state.get(key, {})
-        prog[lesson_id] = fields
-        st.session_state[key] = prog
+    # Update the correct shared cache (previously used stale key names)
+    st.session_state.pop("_progress_cache", None)
 
 def mark_in_progress(lesson_id):
     prog = load_progress()
@@ -1466,23 +1458,23 @@ def page_raf():
 # ─── Main ─────────────────────────────────────────────────────────────────────
 
 def main():
-         inject_css()
-         if not check_password(): return
-         render_sidebar()
-         page = st.session_state.get("current_page","overview")
-         if page == "overview": page_overview()
-         elif page == "calendar":
-             from calendar_page import page_calendar
-             page_calendar()
-         elif page == "korean": page_korean()
-         elif page == "physics": page_physics()
-         elif page == "raf": page_raf()
-         elif page == "cbat":
-             from cbat_page import page_cbat
-             page_cbat()
-         elif page == "ai_tools":
-             from ai_tools import page_ai_tools
-             page_ai_tools()
+    inject_css()
+    if not check_password(): return
+    render_sidebar()
+    page = st.session_state.get("current_page", "overview")
+    if page == "overview": page_overview()
+    elif page == "calendar":
+        from calendar_page import page_calendar
+        page_calendar()
+    elif page == "korean": page_korean()
+    elif page == "physics": page_physics()
+    elif page == "raf": page_raf()
+    elif page == "cbat":
+        from cbat_page import page_cbat
+        page_cbat()
+    elif page == "ai_tools":
+        from ai_tools import page_ai_tools
+        page_ai_tools()
 
 
 
