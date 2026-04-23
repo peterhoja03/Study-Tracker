@@ -1,26 +1,12 @@
 """
 Weakness log store functions.
-Add these to store.py or import separately.
 These handle reading/writing the weakness_log Supabase table.
 """
 
 import json
 from datetime import date
 import streamlit as st
-
-
-def _sb():
-    """Get Supabase client from session state (mirrors app.py _sb)."""
-    if "supabase_client" not in st.session_state:
-        try:
-            from supabase import create_client
-            import os
-            url = st.secrets.get("SUPABASE_URL", "") or os.environ.get("SUPABASE_URL", "")
-            key = st.secrets.get("SUPABASE_KEY", "") or os.environ.get("SUPABASE_KEY", "")
-            st.session_state["supabase_client"] = create_client(url, key) if url and key else None
-        except Exception:
-            st.session_state["supabase_client"] = None
-    return st.session_state["supabase_client"]
+from db import _sb
 
 
 def log_weakness(
@@ -59,8 +45,10 @@ def log_weakness(
     if sb:
         try:
             sb.table("weakness_log").insert(row).execute()
-            # Invalidate cache
-            st.session_state.pop("_weakness_log_cache", None)
+            # Invalidate ALL weakness log cache keys (per-lesson and global)
+            keys_to_clear = [k for k in st.session_state if k.startswith("_weakness_log_cache")]
+            for k in keys_to_clear:
+                del st.session_state[k]
         except Exception as e:
             st.session_state.setdefault("_weakness_log", []).append(row)
     else:
