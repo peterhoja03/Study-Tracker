@@ -10,8 +10,7 @@ import json
 
 # ─── Supabase helper ──────────────────────────────────────────────────────────
 
-def _sb():
-    return st.session_state.get("supabase_client")
+from db import _sb
 
 # ─── WPP Default blocks ───────────────────────────────────────────────────────
 
