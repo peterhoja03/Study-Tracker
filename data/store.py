@@ -11,22 +11,9 @@ import streamlit as st
 
 # ─── Supabase client ──────────────────────────────────────────────────────────
 
-def _get_client():
-    try:
-        from supabase import create_client
-        url = st.secrets.get("SUPABASE_URL") or os.environ.get("SUPABASE_URL", "")
-        key = st.secrets.get("SUPABASE_KEY") or os.environ.get("SUPABASE_KEY", "")
-        if not url or not key:
-            return None
-        return create_client(url, key)
-    except Exception:
-        return None
-
-
-def _sb():
-    if "supabase_client" not in st.session_state:
-        st.session_state["supabase_client"] = _get_client()
-    return st.session_state["supabase_client"]
+import sys, pathlib
+sys.path.insert(0, str(pathlib.Path(__file__).parent.parent))
+from db import _sb
 
 
 # ─── Progress ────────────────────────────────────────────────────────────────
