@@ -20,11 +20,6 @@ def page_ai_tools():
         st.markdown("### 📊 Weekly Analysis")
         st.markdown("Claude reads your session history and weakness log and writes a frank analysis.")
 
-        # Import here to avoid circular issues
-        import importlib, sys
-        # Use app's existing helpers
-        frame = sys._getframe(1)
-        # Load data via store functions available in app context
         try:
             from app import load_sessions, load_progress
             sessions = load_sessions()
