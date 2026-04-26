@@ -364,33 +364,59 @@ def _upsert(lesson_id, fields):
         cache.setdefault(lesson_id, {}).update(fields)
         st.session_state["_progress_cache"] = cache
 
-def mark_complete(lesson_id, score=None, time_spent=25):
+def mark_complete(lesson_id, score=None, time_spent=25, completion_pct=100):
+    """
+    Save lesson progress.
+    completion_pct=100  -> status = "completed", spaced-rep date set.
+    completion_pct<100  -> status = "in_progress", partial progress stored.
+    """
     SR = {0:1,1:3,2:7,3:14,4:30,5:90}
     progress = load_progress()
     existing = progress.get(lesson_id, {})
-    rc = existing.get("review_count", 0) + 1
-    nr = (date.today() + timedelta(days=SR.get(min(rc,5),90))).isoformat()
-    fields = {"status":"completed","completed_date":date.today().isoformat(),"score":score,
-              "review_count":rc,"next_review":nr,"feynman_done":existing.get("feynman_done",False),
-              "notes":existing.get("notes",""),"time_spent":time_spent}
+
+    if completion_pct >= 100:
+        rc = existing.get("review_count", 0) + 1
+        nr = (date.today() + timedelta(days=SR.get(min(rc,5),90))).isoformat()
+        fields = {
+            "status": "completed",
+            "completed_date": date.today().isoformat(),
+            "score": score,
+            "review_count": rc,
+            "next_review": nr,
+            "feynman_done": existing.get("feynman_done", False),
+            "notes": existing.get("notes", ""),
+            "time_spent": (existing.get("time_spent") or 0) + time_spent,
+            "completion_pct": 100,
+        }
+        log_session(lesson_id, time_spent, "completed", f"Score:{score}")
+    else:
+        fields = {
+            "status": "in_progress",
+            "completion_pct": completion_pct,
+            "notes": existing.get("notes", ""),
+            "feynman_done": existing.get("feynman_done", False),
+            "time_spent": (existing.get("time_spent") or 0) + time_spent,
+        }
+        log_session(lesson_id, time_spent, "in_progress", f"{completion_pct}% done")
+
     _upsert(lesson_id, fields)
-    log_session(lesson_id, time_spent, "completed", f"Score:{score}")
     return fields
 
 def unmark_complete(lesson_id):
     sb = _sb()
     fields = {"lesson_id": lesson_id, "status": "not_started", "completed_date": None,
-              "score": None, "review_count": 0, "next_review": None, "feynman_done": False}
+              "score": None, "review_count": 0, "next_review": None, "feynman_done": False,
+              "completion_pct": 0, "time_spent": 0}
     if sb:
         try: sb.table("progress").upsert(fields).execute()
         except Exception: pass
-    # Update the correct shared cache (previously used stale key names)
     st.session_state.pop("_progress_cache", None)
 
 def mark_in_progress(lesson_id):
     prog = load_progress()
-    if prog.get(lesson_id,{}).get("status") != "completed":
-        _upsert(lesson_id, {"status":"in_progress"})
+    existing_pct = prog.get(lesson_id, {}).get("completion_pct", 0)
+    if prog.get(lesson_id, {}).get("status") != "completed":
+        _upsert(lesson_id, {"status": "in_progress", "completion_pct": max(existing_pct, 1)})
 
 def save_notes(lesson_id, notes):
     _upsert(lesson_id, {"notes":notes})
@@ -1071,44 +1097,89 @@ def render_lesson_viewer(lesson, unit_color, unit_level):
             st.success("Saved!")
 
     with tab3:
-        st.markdown("### ✅ Mark Complete")
-        if status == "completed":
-            st.success(
-                f"✅ Completed: {lesson_prog.get('completed_date','?')} | "
-                f"Next review: **{lesson_prog.get('next_review','?')}** | "
-                f"Reviews done: {lesson_prog.get('review_count', 0)}"
-            )
-        st.markdown(
-            f'<div style="background:{_t["complete_bg"]};border:1px solid {_t["complete_bdr"]};'
-            f'border-radius:12px;padding:1.2rem;margin-bottom:1rem;color:{_t["text"]}">'
-            f'<strong>Before completing, confirm:</strong></div>',
-            unsafe_allow_html=True,
-        )
-        for item in [
-            "Read/watched the full resource",
-            "Completed at least one AI active recall attempt",
-            "Can explain the key concepts without notes",
-        ]:
-            st.checkbox(item, key=f"cc_{lesson_id}_{item[:12]}")
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            score = st.slider("Self-score:", 0, 100, 75, key=f"sc_{lesson_id}")
-        with c2:
-            t = st.number_input("Time (min):", 1, 120, value=lesson["estimated_minutes"], key=f"tm_{lesson_id}")
-        with c3:
-            st.markdown("<br>", unsafe_allow_html=True)
-            btn = "✅ Mark Complete" if status != "completed" else "🔄 Log Review"
-            if st.button(btn, use_container_width=True, key=f"mc_{lesson_id}"):
-                result = mark_complete(lesson_id, score=score, time_spent=t)
-                st.success(f"🎉 Done! Next review: **{result['next_review']}**")
-                st.balloons()
-                st.rerun()
+        st.markdown("### ✅ Progress")
+
+        current_pct = lesson_prog.get("completion_pct", 0)
+        time_so_far = lesson_prog.get("time_spent", 0) or 0
 
         if status == "completed":
+            st.success(
+                f"✅ Completed: {lesson_prog.get('completed_date','?')} · "
+                f"Next review: **{lesson_prog.get('next_review','?')}** · "
+                f"Reviews: {lesson_prog.get('review_count', 0)} · "
+                f"Total time: {time_so_far} min"
+            )
+        elif status == "in_progress":
+            dark = st.session_state.get("dark_mode", False)
+            bar_bg = "#21262d" if dark else "#eeeeee"
+            st.markdown(
+                f'<div style="margin-bottom:.8rem">'
+                f'<div style="font-size:.8rem;color:#888;margin-bottom:.3rem">'
+                f'In progress — {current_pct}% complete · {time_so_far} min logged so far</div>'
+                f'<div style="background:{bar_bg};border-radius:999px;height:10px;overflow:hidden">'
+                f'<div style="width:{current_pct}%;height:100%;background:#f39c12;border-radius:999px"></div>'
+                f'</div></div>',
+                unsafe_allow_html=True,
+            )
+
+        st.markdown("**How far did you get in this session?**")
+        pct_options = [25, 50, 75, 100]
+        pct_labels  = ["25% — First quarter", "50% — Halfway", "75% — Three quarters", "100% — Fully done"]
+
+        default_idx = min(
+            next((i for i, p in enumerate(pct_options) if p > current_pct), len(pct_options) - 1),
+            len(pct_options) - 1
+        )
+        chosen_label = st.radio(
+            "Session completion:",
+            pct_labels,
+            index=default_idx,
+            key=f"pct_{lesson_id}",
+            label_visibility="collapsed",
+        )
+        chosen_pct = pct_options[pct_labels.index(chosen_label)]
+
+        if chosen_pct == 100:
+            st.markdown(
+                f'<div style="background:{_t["complete_bg"]};border:1px solid {_t["complete_bdr"]};'
+                f'border-radius:10px;padding:1rem;margin:.8rem 0;color:{_t["text"]}">'
+                f'<strong>Before marking complete, confirm:</strong></div>',
+                unsafe_allow_html=True,
+            )
+            for item in [
+                "Read/watched the full resource",
+                "Completed at least one AI active recall attempt",
+                "Can explain the key concepts without notes",
+            ]:
+                st.checkbox(item, key=f"cc_{lesson_id}_{item[:12]}")
+
+        c1, c2, c3 = st.columns(3)
+        with c1:
+            score = st.slider("Self-score:", 0, 100, 75, key=f"sc_{lesson_id}") if chosen_pct == 100 else None
+        with c2:
+            t = st.number_input("Time this session (min):", 1, 120,
+                                value=min(lesson["estimated_minutes"], 25), key=f"tm_{lesson_id}")
+        with c3:
             st.markdown("<br>", unsafe_allow_html=True)
-            if st.button("↩️ Unmark as Complete", key=f"unmark_{lesson_id}", use_container_width=True):
+            if chosen_pct == 100:
+                btn_label = "✅ Mark Complete" if status != "completed" else "🔄 Log Review"
+            else:
+                btn_label = f"💾 Save Progress ({chosen_pct}%)"
+
+            if st.button(btn_label, use_container_width=True, key=f"mc_{lesson_id}"):
+                result = mark_complete(lesson_id, score=score, time_spent=t, completion_pct=chosen_pct)
+                if chosen_pct == 100:
+                    st.success(f"🎉 Done! Next review: **{result['next_review']}**")
+                    st.balloons()
+                else:
+                    st.success(f"💾 Progress saved — {chosen_pct}% complete. Pick up here next session.")
+                st.rerun()
+
+        if status in ("completed", "in_progress"):
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.button("↩️ Reset Lesson", key=f"unmark_{lesson_id}", use_container_width=True):
                 unmark_complete(lesson_id)
-                st.info("Lesson unmarked — back to not started.")
+                st.info("Lesson reset to not started.")
                 st.rerun()
 
     # ── AI Tools ──────────────────────────────────────────────────────────────
