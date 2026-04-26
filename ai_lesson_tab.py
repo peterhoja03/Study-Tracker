@@ -23,7 +23,7 @@ from ai_helper import (
 from store_weakness import log_weakness, load_weakness_log, get_lesson_weakness_summary
 
 
-def render_ai_lesson_tab(lesson: dict, lesson_prog: dict):
+def render_ai_lesson_tab(lesson: dict, lesson_prog: dict, completed_lessons: list = None):
     """
     Renders the AI tools section below the existing lesson tabs.
     Paste one call to this function at the end of render_lesson_viewer().
@@ -41,7 +41,7 @@ def render_ai_lesson_tab(lesson: dict, lesson_prog: dict):
     )
 
     # Build tab list based on stream
-    tab_labels = ["🧠 Active recall", "🔍 Brain dump", "✍️ Feynman check", "📈 My progress"]
+    tab_labels = ["🧠 Active recall", "🔍 Brain dump", "✍️ Feynman check", "📈 My progress", "💬 Ask the tutor"]
     if stream == "P":
         tab_labels.insert(3, "🔢 Show working")
     elif stream == "U":
@@ -79,7 +79,13 @@ def render_ai_lesson_tab(lesson: dict, lesson_prog: dict):
 
     # ── My Progress ───────────────────────────────────────────────────────────
     with tabs[tab_idx]:
+        tab_idx += 1
         _render_lesson_progress(lesson)
+
+    # ── Ask the Tutor ──────────────────────────────────────────────────────────
+    with tabs[tab_idx]:
+        from tutor_tab import render_tutor_tab
+        render_tutor_tab(lesson, completed_lessons=completed_lessons or [])
 
 
 # ─── Active Recall ─────────────────────────────────────────────────────────────
