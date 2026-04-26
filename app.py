@@ -1183,8 +1183,19 @@ def render_lesson_viewer(lesson, unit_color, unit_level):
                 st.rerun()
 
     # ── AI Tools ──────────────────────────────────────────────────────────────
+    # Build list of completed lesson dicts to give the tutor prior-lesson context
+    from data.korean_curriculum import get_all_lessons as _get_all_k
+    _all_lessons_map = {l["id"]: l for l in _get_all_k()} if lesson["id"].startswith("U") else {}
+    _completed_lessons = [
+        _all_lessons_map[lid]
+        for lid, d in load_progress().items()
+        if d.get("completion_pct", 0) == 100
+        and lid in _all_lessons_map
+        and lid != lesson["id"]
+    ] if _all_lessons_map else []
+
     from ai_lesson_tab import render_ai_lesson_tab
-    render_ai_lesson_tab(lesson, lesson_prog)
+    render_ai_lesson_tab(lesson, lesson_prog, completed_lessons=_completed_lessons)
 
 # ─── Subject Reviews Summary ─────────────────────────────────────────────────
 
