@@ -1,7 +1,7 @@
 """
 tutor_tab.py — AI Tutor Chat Tab
 
-A persistent, per-lesson conversational tutor. Chat history is stored
+A persistent, per-lesson conversational tutor. Chat history is store
 in Supabase (tutor_chats table) so it survives page reloads.
 
 Knowledge priority:
