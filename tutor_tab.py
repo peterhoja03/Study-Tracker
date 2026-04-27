@@ -15,9 +15,7 @@ generation is available but secondary to explanation.
 """
 
 import streamlit as st
-import json
-import requests
-from datetime import datetime
+import os
 from db import _sb
 
 
@@ -69,6 +67,34 @@ def _clear_chat(lesson_id: str):
         except Exception:
             pass
     st.session_state.pop(f"tutor_chat_{lesson_id}", None)
+
+
+def _clear_all_korean_history():
+    """
+    One-time migration: clear all tutor chat history for Korean lessons (U prefix).
+    Runs once per session, tracked by a session state flag.
+    This removes stale history from before the curriculum was rebuilt.
+    """
+    if st.session_state.get("_korean_history_cleared"):
+        return
+    st.session_state["_korean_history_cleared"] = True
+    sb = _sb()
+    if not sb:
+        return
+    try:
+        # Delete all rows where lesson_id starts with U (Korean lessons)
+        # Supabase doesn't support LIKE in the Python client easily,
+        # so we fetch all Korean lesson IDs and delete them
+        res = sb.table("tutor_chats").select("lesson_id").execute()
+        korean_ids = set(
+            r["lesson_id"] for r in res.data
+            if r["lesson_id"].startswith("U")
+        )
+        for lid in korean_ids:
+            sb.table("tutor_chats").delete().eq("lesson_id", lid).execute()
+            st.session_state.pop(f"tutor_chat_{lid}", None)
+    except Exception:
+        pass
 
 
 # ─── Context builder ──────────────────────────────────────────────────────────
@@ -157,27 +183,31 @@ You are not a general chatbot. Stay focused on Korean language learning within t
 
 # ─── API call ─────────────────────────────────────────────────────────────────
 
+def _get_api_key() -> str:
+    try:
+        import streamlit as st
+        return st.secrets.get("ANTHROPIC_API_KEY", "") or os.environ.get("ANTHROPIC_API_KEY", "")
+    except Exception:
+        return os.environ.get("ANTHROPIC_API_KEY", "")
+
+
 def _call_tutor(system_prompt: str, messages: list) -> str:
     """Call the Anthropic API and return the assistant response text."""
+    api_key = _get_api_key()
+    if not api_key:
+        return "ERROR: No ANTHROPIC_API_KEY found in secrets. Please add it to your Streamlit secrets."
     try:
-        response = requests.post(
-            "https://api.anthropic.com/v1/messages",
-            headers={"Content-Type": "application/json"},
-            json={
-                "model": "claude-sonnet-4-20250514",
-                "max_tokens": 1000,
-                "system": system_prompt,
-                "messages": messages,
-            },
+        import anthropic
+        client = anthropic.Anthropic(api_key=api_key)
+        response = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=1000,
+            system=system_prompt,
+            messages=messages,
         )
-        data = response.json()
-        if "content" in data and data["content"]:
-            return data["content"][0].get("text", "Sorry, I couldn't generate a response.")
-        elif "error" in data:
-            return f"API error: {data['error'].get('message', 'Unknown error')}"
-        return "Sorry, something went wrong. Please try again."
+        return response.content[0].text
     except Exception as e:
-        return f"Connection error: {str(e)}"
+        return f"Tutor error: {str(e)}"
 
 
 # ─── Main render function ─────────────────────────────────────────────────────
@@ -193,6 +223,10 @@ def render_tutor_tab(lesson: dict, completed_lessons: list = None):
     """
     if completed_lessons is None:
         completed_lessons = []
+
+    # One-time clear of stale Korean chat history from before curriculum rebuild
+    if lesson["id"].startswith("U"):
+        _clear_all_korean_history()
 
     lesson_id = lesson["id"]
     dark = st.session_state.get("dark_mode", False)
